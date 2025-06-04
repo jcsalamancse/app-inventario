@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -13,6 +13,7 @@ import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 import { login } from '../../../store/actions/auth.actions';
 import { selectAuthLoading, selectAuthError } from '../../../store/selectors/auth.selectors';
+import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-login',
@@ -39,22 +40,54 @@ export class LoginComponent {
   hidePassword = true;
 
   constructor(
+    @Inject(PLATFORM_ID) private platformId: Object,
     private fb: FormBuilder,
     private store: Store
   ) {
+    let rememberedUser = '';
+    if (isPlatformBrowser(this.platformId)) {
+      rememberedUser = localStorage.getItem('rememberedUser') || '';
+    }
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required]],
+      username: [rememberedUser, [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      rememberMe: [false]
+      rememberMe: [!!rememberedUser]
     });
 
     this.loading$ = this.store.select(selectAuthLoading);
     this.error$ = this.store.select(selectAuthError);
+
+    // Escuchar cambios en el campo username y rememberMe para actualizar localStorage en tiempo real
+    this.loginForm.get('rememberMe')?.valueChanges.subscribe(checked => {
+      const username = this.loginForm.get('username')?.value;
+      if (isPlatformBrowser(this.platformId)) {
+        if (checked && username) {
+          localStorage.setItem('rememberedUser', username);
+        } else if (!checked) {
+          localStorage.removeItem('rememberedUser');
+        }
+      }
+    });
+    this.loginForm.get('username')?.valueChanges.subscribe(username => {
+      const checked = this.loginForm.get('rememberMe')?.value;
+      if (isPlatformBrowser(this.platformId)) {
+        if (checked && username) {
+          localStorage.setItem('rememberedUser', username);
+        }
+      }
+    });
   }
 
   onSubmit(): void {
     if (this.loginForm.valid) {
-      const { username, password } = this.loginForm.value;
+      const { username, password, rememberMe } = this.loginForm.value;
+      if (isPlatformBrowser(this.platformId)) {
+        if (rememberMe && username) {
+          localStorage.setItem('rememberedUser', username);
+        } else if (!rememberMe) {
+          localStorage.removeItem('rememberedUser');
+        }
+      }
       this.store.dispatch(login({ username, password }));
     }
   }

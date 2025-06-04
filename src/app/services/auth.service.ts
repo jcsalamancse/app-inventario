@@ -3,14 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface AuthResponse {
-  token: string;
-  refreshToken?: string;
+  Token: string;
+  RefreshToken?: string;
+  ExpiresIn?: number;
   user: any;
 }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly baseUrl = 'https://localhost:7044'; // Cambia esto según tu entorno
+  private readonly baseUrl = 'https://localhost:7044/Api'; // Cambia esto según tu entorno
   private readonly loginEndpoint = '/Auth/Login';
 
   constructor(private http: HttpClient) {}

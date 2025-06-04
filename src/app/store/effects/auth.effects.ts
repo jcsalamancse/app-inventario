@@ -20,12 +20,12 @@ export class AuthEffects {
       mergeMap(action =>
         this.authService.login(action.username, action.password).pipe(
           map(response => {
-            // Guardar token en localStorage
-            localStorage.setItem('token', response.token);
-            if (response.refreshToken) {
-              localStorage.setItem('refreshToken', response.refreshToken);
+            // Guardar Token y RefreshToken en localStorage
+            localStorage.setItem('token', response.Token);
+            if (response.RefreshToken) {
+              localStorage.setItem('refreshToken', response.RefreshToken);
             }
-            return AuthActions.loginSuccess({ user: response.user });
+            return AuthActions.loginSuccess({ user: { username: action.username } });
           }),
           catchError(error => {
             let errorMsg = 'Error de autenticación';
@@ -33,7 +33,7 @@ export class AuthEffects {
               errorMsg = error.error.message;
             }
             // Mostrar pop-up de error
-            this.snackBar.open(errorMsg, 'Aceptar', { duration: 4000, panelClass: 'bg-red-600 text-white' });
+            this.snackBar.open(errorMsg, 'Aceptar', { duration: 4000, panelClass: ['bg-red-600', 'text-white'] });
             return of(AuthActions.loginFailure({ error: errorMsg }));
           })
         )
@@ -45,7 +45,7 @@ export class AuthEffects {
     return this.actions$.pipe(
       ofType(AuthActions.loginSuccess),
       tap(() => {
-        this.snackBar.open('¡Autenticación exitosa!', 'Aceptar', { duration: 2000, panelClass: 'bg-green-600 text-white' });
+        this.snackBar.open('¡Autenticación exitosa!', 'Aceptar', { duration: 2000, panelClass: ['bg-green-600', 'text-white'] });
         this.router.navigate(['/dashboard']);
       }),
       map(() => ({ type: '[Auth] Login Success Navigation' }))

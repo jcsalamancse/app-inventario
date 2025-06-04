@@ -1,0 +1,6 @@
+.blur-backdrop {
+  filter: blur(4px) brightness(0.8);
+  pointer-events: none;
+  user-select: none;
+  transition: filter 0.2s;
+}
