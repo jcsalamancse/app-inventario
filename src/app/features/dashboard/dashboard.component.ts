@@ -15,11 +15,21 @@ import { ComponentPortal } from '@angular/cdk/portal';
 import { ViewContainerRef } from '@angular/core';
 import { UserMenuOverlayComponent } from './user-menu-overlay.component';
 import { NotificationsOverlayComponent } from './notifications-overlay.component';
+import { ChangePasswordDialogComponent } from './change-password-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatButtonModule, MatDialogModule, HttpClientModule, MatProgressSpinnerModule, NgChartsModule],
+  imports: [
+    CommonModule, 
+    MatIconModule, 
+    MatButtonModule, 
+    MatDialogModule, 
+    HttpClientModule, 
+    MatProgressSpinnerModule, 
+    NgChartsModule,
+    ChangePasswordDialogComponent
+  ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
 })
@@ -121,7 +131,21 @@ export class DashboardComponent {
   }
 
   onChangePassword() {
-    alert('Funcionalidad de cambio de contraseña próximamente.');
+    console.log('Abriendo diálogo de cambio de contraseña...');
+    const dialogRef = this.dialog.open(ChangePasswordDialogComponent, {
+      width: '400px',
+      panelClass: 'custom-dialog-container',
+      autoFocus: true,
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('Diálogo cerrado con resultado:', result);
+      if (result) {
+        // El cambio de contraseña fue exitoso
+        console.log('Cambio de contraseña exitoso');
+      }
+    });
   }
 
   openUserMenu(origin: EventTarget | null) {

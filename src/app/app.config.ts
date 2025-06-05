@@ -1,32 +1,30 @@
-import { ApplicationConfig, isDevMode } from '@angular/core';
+import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideClientHydration } from '@angular/platform-browser';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideHttpClient } from '@angular/common/http';
 import { provideStore } from '@ngrx/store';
 import { provideEffects } from '@ngrx/effects';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
-import { provideHttpClient, withFetch } from '@angular/common/http';
 
 import { routes } from './app.routes';
 import { authReducer } from './store/reducers/auth.reducer';
 import { AuthEffects } from './store/effects/auth.effects';
+import { ChangePasswordDialogComponent } from './features/dashboard/change-password-dialog.component';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
-    provideClientHydration(),
-    provideAnimations(),
-    provideHttpClient(withFetch()),
-    provideStore({
-      auth: authReducer
-    }),
+    provideHttpClient(),
+    provideStore({ auth: authReducer }),
     provideEffects([AuthEffects]),
+    provideAnimationsAsync(),
     provideStoreDevtools({
       maxAge: 25,
-      logOnly: !isDevMode(),
+      logOnly: false,
       autoPause: true,
       trace: false,
       traceLimit: 75,
-    })
+    }),
+    ChangePasswordDialogComponent
   ]
 };

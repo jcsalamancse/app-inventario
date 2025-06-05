@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface AuthResponse {
@@ -9,10 +9,17 @@ export interface AuthResponse {
   user: any;
 }
 
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly baseUrl = 'https://localhost:7044/Api'; // Cambia esto según tu entorno
   private readonly loginEndpoint = '/Auth/Login';
+  private readonly changePasswordEndpoint = '/user/me/password';
 
   constructor(private http: HttpClient) {}
 
@@ -20,6 +27,19 @@ export class AuthService {
     return this.http.post<AuthResponse>(
       this.baseUrl + this.loginEndpoint,
       { userName, password }
+    );
+  }
+
+  changePassword(request: ChangePasswordRequest): Observable<any> {
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.put(
+      this.baseUrl + this.changePasswordEndpoint,
+      request,
+      { headers }
     );
   }
 } 
