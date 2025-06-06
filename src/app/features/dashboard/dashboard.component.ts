@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { inject } from '@angular/core';
 import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -15,7 +15,6 @@ import { ComponentPortal } from '@angular/cdk/portal';
 import { ViewContainerRef } from '@angular/core';
 import { UserMenuOverlayComponent } from './user-menu-overlay.component';
 import { NotificationsOverlayComponent } from './notifications-overlay.component';
-import { ChangePasswordDialogComponent } from './change-password-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -28,7 +27,7 @@ import { ChangePasswordDialogComponent } from './change-password-dialog.componen
     HttpClientModule, 
     MatProgressSpinnerModule, 
     NgChartsModule,
-    ChangePasswordDialogComponent
+    RouterModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -66,7 +65,8 @@ export class DashboardComponent {
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
-    private router: Router, private http: HttpClient,
+    public router: Router,
+    private http: HttpClient,
     private overlay: Overlay,
     private vcr: ViewContainerRef
   ) {
@@ -130,24 +130,6 @@ export class DashboardComponent {
     });
   }
 
-  onChangePassword() {
-    console.log('Abriendo diálogo de cambio de contraseña...');
-    const dialogRef = this.dialog.open(ChangePasswordDialogComponent, {
-      width: '400px',
-      panelClass: 'custom-dialog-container',
-      autoFocus: true,
-      disableClose: true
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('Diálogo cerrado con resultado:', result);
-      if (result) {
-        // El cambio de contraseña fue exitoso
-        console.log('Cambio de contraseña exitoso');
-      }
-    });
-  }
-
   openUserMenu(origin: EventTarget | null) {
     if (!origin || !(origin instanceof HTMLElement)) return;
     if (this.overlayRef) {
@@ -181,6 +163,11 @@ export class DashboardComponent {
     this.overlayRef.backdropClick().subscribe(() => {
       this.overlayRef?.dispose();
     });
+  }
+
+  onChangePassword() {
+    // TODO: Implementar cambio de contraseña
+    console.log('Cambio de contraseña');
   }
 
   openNotifications() {

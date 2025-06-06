@@ -1,9 +1,24 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './features/auth/login/login.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { USERS_ROUTES } from './features/users/users.routes';
+import { CATEGORIES_ROUTES } from './features/categories/categories.routes';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: 'dashboard', component: DashboardComponent },
+  { 
+    path: 'dashboard', 
+    component: DashboardComponent,
+    children: [
+      {
+        path: 'users',
+        children: USERS_ROUTES
+      },
+      {
+        path: 'categories',
+        children: CATEGORIES_ROUTES
+      }
+    ]
+  },
   { path: '', redirectTo: '/login', pathMatch: 'full' }
 ];

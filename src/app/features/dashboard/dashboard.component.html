@@ -15,7 +15,7 @@
         <span>Dashboard</span>
       </a>
       <a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#23234a] transition-all duration-200 cursor-pointer font-medium text-base group" 
-         routerLink="/productos" 
+         routerLink="/dashboard/productos" 
          routerLinkActive="bg-[#23234a]">
         <div class="bg-white/10 p-2 rounded-lg group-hover:bg-white/20 transition-colors">
           <mat-icon fontIcon="inventory_2" class="text-xl"></mat-icon>
@@ -23,7 +23,7 @@
         <span>Productos</span>
       </a>
       <a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#23234a] transition-all duration-200 cursor-pointer font-medium text-base group" 
-         routerLink="/movimientos" 
+         routerLink="/dashboard/movimientos" 
          routerLinkActive="bg-[#23234a]">
         <div class="bg-white/10 p-2 rounded-lg group-hover:bg-white/20 transition-colors">
           <mat-icon fontIcon="swap_horiz" class="text-xl"></mat-icon>
@@ -31,7 +31,7 @@
         <span>Movimientos</span>
       </a>
       <a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#23234a] transition-all duration-200 cursor-pointer font-medium text-base group" 
-         routerLink="/usuarios" 
+         routerLink="/dashboard/users" 
          routerLinkActive="bg-[#23234a]">
         <div class="bg-white/10 p-2 rounded-lg group-hover:bg-white/20 transition-colors">
           <mat-icon fontIcon="people" class="text-xl"></mat-icon>
@@ -39,7 +39,15 @@
         <span>Usuarios</span>
       </a>
       <a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#23234a] transition-all duration-200 cursor-pointer font-medium text-base group" 
-         routerLink="/reportes" 
+         routerLink="/dashboard/categories" 
+         routerLinkActive="bg-[#23234a]">
+        <div class="bg-white/10 p-2 rounded-lg group-hover:bg-white/20 transition-colors">
+          <mat-icon fontIcon="category" class="text-xl"></mat-icon>
+        </div>
+        <span>Categorías</span>
+      </a>
+      <a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#23234a] transition-all duration-200 cursor-pointer font-medium text-base group" 
+         routerLink="/dashboard/reportes" 
          routerLinkActive="bg-[#23234a]">
         <div class="bg-white/10 p-2 rounded-lg group-hover:bg-white/20 transition-colors">
           <mat-icon fontIcon="bar_chart" class="text-xl"></mat-icon>
@@ -123,154 +131,160 @@
       </div>
     </div>
 
-    <!-- Hero de bienvenida y KPIs -->
-    <div class="mb-8">
-      <div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6 sm:p-8 transition-all duration-200">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <h2 class="text-xl sm:text-2xl font-semibold text-white mb-2">Panel de control</h2>
-            <p class="text-purple-200 text-sm sm:text-base">Gestiona tu inventario, usuarios y reportes desde un solo lugar.</p>
+    <!-- Router outlet para las rutas hijas -->
+    <router-outlet></router-outlet>
+
+    <!-- Contenido del dashboard (solo visible en la ruta principal) -->
+    <ng-container *ngIf="router.url === '/dashboard'">
+      <!-- Hero de bienvenida y KPIs -->
+      <div class="mb-8">
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6 sm:p-8 transition-all duration-200">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl sm:text-2xl font-semibold text-white mb-2">Panel de control</h2>
+              <p class="text-purple-200 text-sm sm:text-base">Gestiona tu inventario, usuarios y reportes desde un solo lugar.</p>
+            </div>
+            <div class="flex gap-3">
+              <button class="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 text-sm font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                <mat-icon fontIcon="download" class="text-lg"></mat-icon>
+                <span>Exportar</span>
+              </button>
+              <button class="bg-green-500/20 hover:bg-green-500/30 text-green-400 text-sm font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                <mat-icon fontIcon="refresh" class="text-lg"></mat-icon>
+                <span>Actualizar</span>
+              </button>
+            </div>
           </div>
-          <div class="flex gap-3">
-            <button class="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 text-sm font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
-              <mat-icon fontIcon="download" class="text-lg"></mat-icon>
-              <span>Exportar</span>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6 hover:bg-white/15 transition-colors">
+          <div class="flex items-center justify-between mb-4">
+            <div class="bg-blue-500/20 p-3 rounded-xl">
+              <mat-icon fontIcon="inventory_2" class="text-blue-400 text-2xl"></mat-icon>
+            </div>
+            <span class="text-green-400 text-sm font-medium flex items-center gap-1">
+              <mat-icon fontIcon="trending_up" class="text-lg"></mat-icon>
+              +12%
+            </span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-3xl font-bold text-white mb-1">0</span>
+            <span class="text-purple-200 text-sm">Total Productos</span>
+          </div>
+        </div>
+
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6 hover:bg-white/15 transition-colors">
+          <div class="flex items-center justify-between mb-4">
+            <div class="bg-green-500/20 p-3 rounded-xl">
+              <mat-icon fontIcon="swap_horiz" class="text-green-400 text-2xl"></mat-icon>
+            </div>
+            <span class="text-green-400 text-sm font-medium flex items-center gap-1">
+              <mat-icon fontIcon="trending_up" class="text-lg"></mat-icon>
+              +8%
+            </span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-3xl font-bold text-white mb-1">0</span>
+            <span class="text-purple-200 text-sm">Movimientos</span>
+          </div>
+        </div>
+
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6 hover:bg-white/15 transition-colors">
+          <div class="flex items-center justify-between mb-4">
+            <div class="bg-purple-500/20 p-3 rounded-xl">
+              <mat-icon fontIcon="people" class="text-purple-400 text-2xl"></mat-icon>
+            </div>
+            <span class="text-green-400 text-sm font-medium flex items-center gap-1">
+              <mat-icon fontIcon="trending_up" class="text-lg"></mat-icon>
+              +5%
+            </span>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-3xl font-bold text-white mb-1">0</span>
+            <span class="text-purple-200 text-sm">Usuarios Activos</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gráfica y Tabla -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <!-- Gráfica -->
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-white">Movimientos por mes</h3>
+            <div class="flex gap-2">
+              <button class="bg-white/10 hover:bg-white/20 text-white text-xs font-medium py-1 px-3 rounded-lg transition-colors">
+                Mensual
+              </button>
+              <button class="bg-white/10 hover:bg-white/20 text-white text-xs font-medium py-1 px-3 rounded-lg transition-colors">
+                Anual
+              </button>
+            </div>
+          </div>
+          <div class="h-[300px]">
+            <ng-container *ngIf="isBrowser">
+              <canvas baseChart
+                [data]="barChartData"
+                [options]="barChartOptions"
+                [type]="'bar'">
+              </canvas>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Tabla de movimientos recientes -->
+        <div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-white">Movimientos recientes</h3>
+            <button class="text-blue-400 text-sm font-medium hover:text-blue-300 transition-colors">
+              Ver todos
             </button>
-            <button class="bg-green-500/20 hover:bg-green-500/30 text-green-400 text-sm font-medium py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
-              <mat-icon fontIcon="refresh" class="text-lg"></mat-icon>
-              <span>Actualizar</span>
-            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="text-left text-sm text-purple-200 border-b border-white/10">
+                  <th class="pb-3 font-medium">Producto</th>
+                  <th class="pb-3 font-medium">Tipo</th>
+                  <th class="pb-3 font-medium">Cantidad</th>
+                  <th class="pb-3 font-medium">Fecha</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="loadingMovimientos" class="text-white/60">
+                  <td colspan="4" class="py-4 text-center">
+                    <div class="flex items-center justify-center gap-2">
+                      <mat-spinner diameter="20"></mat-spinner>
+                      <span>Cargando movimientos...</span>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="!loadingMovimientos && movimientos.length === 0" class="text-white/60">
+                  <td colspan="4" class="py-4 text-center">
+                    No hay movimientos recientes
+                  </td>
+                </tr>
+                <tr *ngFor="let movimiento of movimientos" class="text-white/80 border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <td class="py-3">{{ movimiento.producto }}</td>
+                  <td class="py-3">
+                    <span [ngClass]="{
+                      'bg-green-500/20 text-green-400': movimiento.tipo === 'Entrada',
+                      'bg-red-500/20 text-red-400': movimiento.tipo === 'Salida'
+                    }" class="px-2 py-1 rounded-full text-xs font-medium">
+                      {{ movimiento.tipo }}
+                    </span>
+                  </td>
+                  <td class="py-3">{{ movimiento.cantidad }}</td>
+                  <td class="py-3 text-sm">{{ movimiento.fecha | date:'short' }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- KPIs -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8">
-      <div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6 hover:bg-white/15 transition-colors">
-        <div class="flex items-center justify-between mb-4">
-          <div class="bg-blue-500/20 p-3 rounded-xl">
-            <mat-icon fontIcon="inventory_2" class="text-blue-400 text-2xl"></mat-icon>
-          </div>
-          <span class="text-green-400 text-sm font-medium flex items-center gap-1">
-            <mat-icon fontIcon="trending_up" class="text-lg"></mat-icon>
-            +12%
-          </span>
-        </div>
-        <div class="flex flex-col">
-          <span class="text-3xl font-bold text-white mb-1">0</span>
-          <span class="text-purple-200 text-sm">Total Productos</span>
-        </div>
-      </div>
-
-      <div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6 hover:bg-white/15 transition-colors">
-        <div class="flex items-center justify-between mb-4">
-          <div class="bg-green-500/20 p-3 rounded-xl">
-            <mat-icon fontIcon="swap_horiz" class="text-green-400 text-2xl"></mat-icon>
-          </div>
-          <span class="text-green-400 text-sm font-medium flex items-center gap-1">
-            <mat-icon fontIcon="trending_up" class="text-lg"></mat-icon>
-            +8%
-          </span>
-        </div>
-        <div class="flex flex-col">
-          <span class="text-3xl font-bold text-white mb-1">0</span>
-          <span class="text-purple-200 text-sm">Movimientos</span>
-        </div>
-      </div>
-
-      <div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6 hover:bg-white/15 transition-colors">
-        <div class="flex items-center justify-between mb-4">
-          <div class="bg-purple-500/20 p-3 rounded-xl">
-            <mat-icon fontIcon="people" class="text-purple-400 text-2xl"></mat-icon>
-          </div>
-          <span class="text-green-400 text-sm font-medium flex items-center gap-1">
-            <mat-icon fontIcon="trending_up" class="text-lg"></mat-icon>
-            +5%
-          </span>
-        </div>
-        <div class="flex flex-col">
-          <span class="text-3xl font-bold text-white mb-1">0</span>
-          <span class="text-purple-200 text-sm">Usuarios Activos</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Gráfica y Tabla -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-      <!-- Gráfica -->
-      <div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-lg font-semibold text-white">Movimientos por mes</h3>
-          <div class="flex gap-2">
-            <button class="bg-white/10 hover:bg-white/20 text-white text-xs font-medium py-1 px-3 rounded-lg transition-colors">
-              Mensual
-            </button>
-            <button class="bg-white/10 hover:bg-white/20 text-white text-xs font-medium py-1 px-3 rounded-lg transition-colors">
-              Anual
-            </button>
-          </div>
-        </div>
-        <div class="h-[300px]">
-          <ng-container *ngIf="isBrowser">
-            <canvas baseChart
-              [data]="barChartData"
-              [options]="barChartOptions"
-              [type]="'bar'">
-            </canvas>
-          </ng-container>
-        </div>
-      </div>
-
-      <!-- Tabla de movimientos recientes -->
-      <div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-lg font-semibold text-white">Movimientos recientes</h3>
-          <button class="text-blue-400 text-sm font-medium hover:text-blue-300 transition-colors">
-            Ver todos
-          </button>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="text-left text-sm text-purple-200 border-b border-white/10">
-                <th class="pb-3 font-medium">Producto</th>
-                <th class="pb-3 font-medium">Tipo</th>
-                <th class="pb-3 font-medium">Cantidad</th>
-                <th class="pb-3 font-medium">Fecha</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngIf="loadingMovimientos" class="text-white/60">
-                <td colspan="4" class="py-4 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <mat-spinner diameter="20"></mat-spinner>
-                    <span>Cargando movimientos...</span>
-                  </div>
-                </td>
-              </tr>
-              <tr *ngIf="!loadingMovimientos && movimientos.length === 0" class="text-white/60">
-                <td colspan="4" class="py-4 text-center">
-                  No hay movimientos recientes
-                </td>
-              </tr>
-              <tr *ngFor="let movimiento of movimientos" class="text-white/80 border-b border-white/5 hover:bg-white/5 transition-colors">
-                <td class="py-3">{{ movimiento.producto }}</td>
-                <td class="py-3">
-                  <span [ngClass]="{
-                    'bg-green-500/20 text-green-400': movimiento.tipo === 'Entrada',
-                    'bg-red-500/20 text-red-400': movimiento.tipo === 'Salida'
-                  }" class="px-2 py-1 rounded-full text-xs font-medium">
-                    {{ movimiento.tipo }}
-                  </span>
-                </td>
-                <td class="py-3">{{ movimiento.cantidad }}</td>
-                <td class="py-3 text-sm">{{ movimiento.fecha | date:'short' }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+    </ng-container>
   </main>
 </div>
