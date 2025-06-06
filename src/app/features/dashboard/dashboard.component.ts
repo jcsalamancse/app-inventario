@@ -15,6 +15,7 @@ import { ComponentPortal } from '@angular/cdk/portal';
 import { ViewContainerRef } from '@angular/core';
 import { UserMenuOverlayComponent } from './user-menu-overlay.component';
 import { NotificationsOverlayComponent } from './notifications-overlay.component';
+import { ChangePasswordDialogComponent } from './change-password-dialog.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -166,8 +167,17 @@ export class DashboardComponent {
   }
 
   onChangePassword() {
-    // TODO: Implementar cambio de contraseña
-    console.log('Cambio de contraseña');
+    const dialogRef = this.dialog.open(ChangePasswordDialogComponent, {
+      width: '400px',
+      panelClass: 'custom-dialog-container',
+      autoFocus: true,
+      disableClose: true
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // Lógica después de cambiar la contraseña
+      }
+    });
   }
 
   openNotifications() {
