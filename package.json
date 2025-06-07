@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "set NODE_TLS_REJECT_UNAUTHORIZED=0 && ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:app-inventario": "node dist/app-inventario/server/server.mjs"
+    "serve:ssr:app-inventario": "set NODE_TLS_REJECT_UNAUTHORIZED=0 && node dist/app-inventario/server/server.mjs"
   },
   "private": true,
   "dependencies": {

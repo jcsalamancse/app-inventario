@@ -15,15 +15,26 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatCardModule } from '@angular/material/card';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatBadgeModule } from '@angular/material/badge';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { RouterModule } from '@angular/router';
-import { ProductService, Product, ProductFilter } from '../../services/product.service';
+import { ProductService } from '../../services/product.service';
+import { Product, ProductDto, ProductFilter, ProductPaginationResult } from '../../models/product.model';
 import { ProductFormComponent } from '../product-form/product-form.component';
+import { catchError, of } from 'rxjs';
+import { CategoryService } from '../../../categories/services/category.service';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Inject } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-products-list',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatTableModule,
     MatPaginatorModule,
     MatSortModule,
@@ -39,133 +50,324 @@ import { ProductFormComponent } from '../product-form/product-form.component';
     MatTooltipModule,
     MatMenuModule,
     MatSnackBarModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    MatBadgeModule,
+    MatProgressBarModule,
     RouterModule
   ],
   template: `
-    <div class="bg-white rounded-xl shadow p-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold">Productos</h2>
-        <button mat-raised-button color="primary" (click)="openProductDialog()">
-          <mat-icon>add</mat-icon>
-          Nuevo Producto
-        </button>
+    <div class="container mx-auto p-4">
+      <!-- Header con estadísticas -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <mat-card class="bg-blue-50">
+          <mat-card-content class="p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600">Total Productos</p>
+                <p class="text-2xl font-bold text-blue-600">{{totalProducts}}</p>
+              </div>
+              <mat-icon class="text-blue-500">inventory_2</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="bg-yellow-50">
+          <mat-card-content class="p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600">Stock Bajo</p>
+                <p class="text-2xl font-bold text-yellow-600">{{lowStockCount}}</p>
+              </div>
+              <mat-icon class="text-yellow-500">warning</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="bg-green-50">
+          <mat-card-content class="p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600">Activos</p>
+                <p class="text-2xl font-bold text-green-600">{{activeProducts}}</p>
+              </div>
+              <mat-icon class="text-green-500">check_circle</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="bg-purple-50">
+          <mat-card-content class="p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600">Valor Total</p>
+                <p class="text-2xl font-bold text-purple-600">{{totalValue | currency}}</p>
+              </div>
+              <mat-icon class="text-purple-500">attach_money</mat-icon>
+            </div>
+          </mat-card-content>
+        </mat-card>
       </div>
-      <table mat-table [dataSource]="dataSource" matSort>
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>ID</th>
-          <td mat-cell *matCellDef="let row">{{row.id}}</td>
-        </ng-container>
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Nombre</th>
-          <td mat-cell *matCellDef="let row">{{row.name}}</td>
-        </ng-container>
-        <ng-container matColumnDef="price">
-          <th mat-header-cell *matHeaderCellDef>Precio</th>
-          <td mat-cell *matCellDef="let row">{{row.price | currency}}</td>
-        </ng-container>
-        <ng-container matColumnDef="stock">
-          <th mat-header-cell *matHeaderCellDef>Stock</th>
-          <td mat-cell *matCellDef="let row">{{row.stock}}</td>
-        </ng-container>
-        <ng-container matColumnDef="categoryId">
-          <th mat-header-cell *matHeaderCellDef>Categoría</th>
-          <td mat-cell *matCellDef="let row">{{row.categoryId}}</td>
-        </ng-container>
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Estado</th>
-          <td mat-cell *matCellDef="let row">
-            <mat-chip-listbox>
-              <mat-chip [color]="row.status === 'active' ? 'primary' : 'warn'" selected>
-                {{row.status}}
-              </mat-chip>
-            </mat-chip-listbox>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Acciones</th>
-          <td mat-cell *matCellDef="let row">
-            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Menu de acciones">
-              <mat-icon>more_vert</mat-icon>
-            </button>
-            <mat-menu #menu="matMenu">
-              <button mat-menu-item (click)="editProduct(row)">
-                <mat-icon>edit</mat-icon>
-                <span>Editar</span>
-              </button>
-              <button mat-menu-item (click)="deleteProduct(row)">
-                <mat-icon>delete</mat-icon>
-                <span>Eliminar</span>
-              </button>
-              <button mat-menu-item (click)="viewMovements(row)">
-                <mat-icon>history</mat-icon>
-                <span>Ver Movimientos</span>
-              </button>
-            </mat-menu>
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-      <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Seleccionar página de productos"></mat-paginator>
+
+      <!-- Filtros avanzados -->
+      <mat-card class="mb-6">
+        <mat-card-content class="p-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <mat-form-field class="w-full">
+              <mat-label>Buscar</mat-label>
+              <input matInput (keyup)="applyFilter($event)" placeholder="Buscar productos...">
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field class="w-full">
+              <mat-label>Categoría</mat-label>
+              <mat-select multiple [(ngModel)]="categorySelected" (selectionChange)="applyFilters()">
+                <mat-option *ngFor="let category of categories" [value]="category.id">
+                  {{category.name}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="w-full">
+              <mat-label>Rango de Precios</mat-label>
+              <mat-select [(ngModel)]="priceRangeSelected" (selectionChange)="applyFilters()">
+                <mat-option value="0-100">$0 - $100</mat-option>
+                <mat-option value="100-500">$100 - $500</mat-option>
+                <mat-option value="500+">$500+</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="w-full">
+              <mat-label>Estado</mat-label>
+              <mat-select [(ngModel)]="statusSelected" (selectionChange)="applyFilters()">
+                <mat-option value="all">Todos</mat-option>
+                <mat-option value="active">Activos</mat-option>
+                <mat-option value="inactive">Inactivos</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Tabla de productos -->
+      <mat-card>
+        <mat-card-header class="flex justify-between items-center p-4">
+          <mat-card-title>Lista de Productos</mat-card-title>
+          <button mat-raised-button color="primary" (click)="openProductDialog()">
+            <mat-icon>add</mat-icon>
+            Nuevo Producto
+          </button>
+        </mat-card-header>
+
+        <mat-card-content>
+          @if (loading) {
+            <div class="flex justify-center items-center p-8">
+              <mat-spinner diameter="40"></mat-spinner>
+            </div>
+          } @else {
+            <div class="overflow-x-auto">
+              <table mat-table [dataSource]="dataSource" matSort class="w-full">
+                <ng-container matColumnDef="id">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+                  <td mat-cell *matCellDef="let row">{{row.Id}}</td>
+                </ng-container>
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+                  <td mat-cell *matCellDef="let row">{{row.Name}}</td>
+                </ng-container>
+                <ng-container matColumnDef="description">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Descripción</th>
+                  <td mat-cell *matCellDef="let row">{{row.Description}}</td>
+                </ng-container>
+                <ng-container matColumnDef="price">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Precio</th>
+                  <td mat-cell *matCellDef="let row">{{row.Price | currency}}</td>
+                </ng-container>
+                <ng-container matColumnDef="currentStock">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Stock Actual</th>
+                  <td mat-cell *matCellDef="let row">{{row.CurrentStock}}</td>
+                </ng-container>
+                <ng-container matColumnDef="minimumStock">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Stock Mínimo</th>
+                  <td mat-cell *matCellDef="let row">{{row.MinimumStock}}</td>
+                </ng-container>
+                <ng-container matColumnDef="maximumStock">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Stock Máximo</th>
+                  <td mat-cell *matCellDef="let row">{{row.MaximumStock}}</td>
+                </ng-container>
+                <ng-container matColumnDef="categoryName">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Categoría</th>
+                  <td mat-cell *matCellDef="let row">{{row.CategoryName}}</td>
+                </ng-container>
+                <ng-container matColumnDef="unitName">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Unidad</th>
+                  <td mat-cell *matCellDef="let row">{{row.UnitName}}</td>
+                </ng-container>
+                <ng-container matColumnDef="isActive">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+                  <td mat-cell *matCellDef="let row">
+                    <mat-chip [color]="row.IsActive ? 'primary' : 'warn'" selected>
+                      {{row.IsActive ? 'Activo' : 'Inactivo'}}
+                    </mat-chip>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="createdAt">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header>Creado</th>
+                  <td mat-cell *matCellDef="let row">{{row.CreatedAt | date:'short'}}</td>
+                </ng-container>
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                  <td mat-cell *matCellDef="let row">
+                    <button mat-icon-button (click)="editProduct(row)"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="deleteProduct(row)"><mat-icon>delete</mat-icon></button>
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+            </div>
+
+            <mat-paginator 
+              [pageSizeOptions]="[5, 10, 25, 100]" 
+              [pageSize]="10"
+              (page)="onPageChange($event)"
+              aria-label="Seleccionar página de productos">
+            </mat-paginator>
+          }
+        </mat-card-content>
+      </mat-card>
     </div>
   `,
   styles: [`
     .container {
-      padding: 20px;
-    }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .filter-field {
-      width: 100%;
-      margin-bottom: 20px;
-    }
-    .table-container {
-      overflow: auto;
-    }
-    table {
-      width: 100%;
+      max-width: 1400px;
     }
     .mat-column-actions {
-      width: 120px;
+      width: 80px;
       text-align: center;
+    }
+    .stock-warning {
+      color: #f44336;
+    }
+    .stock-normal {
+      color: #4caf50;
+    }
+    .mat-progress-bar {
+      height: 8px;
+      border-radius: 4px;
     }
   `]
 })
 export class ProductsListComponent implements OnInit {
-  displayedColumns: string[] = ['id', 'name', 'price', 'stock', 'categoryId', 'status', 'actions'];
+  displayedColumns: string[] = [
+    'id',
+    'name',
+    'description',
+    'price',
+    'currentStock',
+    'minimumStock',
+    'maximumStock',
+    'categoryName',
+    'unitName',
+    'isActive',
+    'createdAt',
+    'actions'
+  ];
   dataSource: any;
   filter: ProductFilter = {};
+  categories: any[] = [];
+  loading = false;
+  totalProducts = 0;
+  lowStockCount = 0;
+  activeProducts = 0;
+  totalValue = 0;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
-  @ViewChild(MatTable) table!: MatTable<Product>;
+  @ViewChild(MatTable) table!: MatTable<ProductDto>;
+
+  categorySelected: number[] = [];
+  priceRangeSelected: string = '';
+  statusSelected: string = '';
 
   constructor(
     private productService: ProductService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private categoryService: CategoryService
   ) {}
 
   ngOnInit() {
+    this.loadCategories();
     this.loadProducts();
+    this.loadStatistics();
+  }
+
+  loadCategories() {
+    this.categoryService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+      },
+      error: (error) => {
+        console.error('Error al cargar categorías', error);
+      }
+    });
   }
 
   loadProducts() {
-    this.productService.getProducts(this.filter).subscribe({
+    this.loading = true;
+    this.productService.getProducts(this.filter).pipe(
+      catchError(error => {
+        console.error('Error al cargar productos:', error);
+        this.snackBar.open('Error al conectar con el servidor. Por favor, intente nuevamente.', 'Cerrar', {
+          duration: 5000
+        });
+        this.loading = false;
+        return of({ Items: [], TotalCount: 0 });
+      })
+    ).subscribe({
       next: (response) => {
-        this.dataSource = response;
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
+        this.dataSource = response.Items;
+        this.totalProducts = response.TotalCount;
+        this.loading = false;
       },
       error: (error) => {
-        console.error('Error al cargar productos:', error);
-        this.snackBar.open('Error al cargar productos', 'Cerrar', {
-          duration: 3000
-        });
+        this.loading = false;
+      }
+    });
+  }
+
+  loadStatistics() {
+    // Cargar productos con stock bajo
+    this.productService.getLowStockProducts().pipe(
+      catchError(error => {
+        console.error('Error al cargar productos con stock bajo:', error);
+        return of([]);
+      })
+    ).subscribe({
+      next: (products) => {
+        this.lowStockCount = products.length;
+      }
+    });
+
+    // Calcular valor total y productos activos
+    this.productService.getProducts().pipe(
+      catchError(error => {
+        console.error('Error al cargar estadísticas:', error);
+        return of({
+          Items: [],
+          TotalCount: 0,
+          PageNumber: 1,
+          PageSize: 10,
+          TotalPages: 1,
+          HasPreviousPage: false,
+          HasNextPage: false
+        } as ProductPaginationResult);
+      })
+    ).subscribe({
+      next: (response: ProductPaginationResult) => {
+        this.activeProducts = response.Items.filter((p: any) => p.IsActive).length;
+        this.totalValue = response.Items.reduce((sum: number, p: any) => sum + (p.Price * p.CurrentStock), 0);
       }
     });
   }
@@ -176,44 +378,168 @@ export class ProductsListComponent implements OnInit {
     this.loadProducts();
   }
 
-  openProductDialog(product?: Product) {
+  applyFilters() {
+    // Categoría
+    this.filter.categoryId = this.categorySelected.length > 0 ? this.categorySelected : undefined;
+    // Rango de precios
+    if (this.priceRangeSelected) {
+      if (this.priceRangeSelected === '0-100') {
+        this.filter.minPrice = 0;
+        this.filter.maxPrice = 100;
+      } else if (this.priceRangeSelected === '100-500') {
+        this.filter.minPrice = 100;
+        this.filter.maxPrice = 500;
+      } else if (this.priceRangeSelected === '500+') {
+        this.filter.minPrice = 500;
+        this.filter.maxPrice = undefined;
+      }
+    } else {
+      this.filter.minPrice = undefined;
+      this.filter.maxPrice = undefined;
+    }
+    // Estado
+    if (this.statusSelected && this.statusSelected !== 'all') {
+      this.filter.isActive = this.statusSelected === 'active' ? true : false;
+    } else {
+      this.filter.isActive = undefined;
+    }
+    this.loadProducts();
+  }
+
+  onPageChange(event: any) {
+    this.filter.page = event.pageIndex + 1;
+    this.filter.pageSize = event.pageSize;
+    this.loadProducts();
+  }
+
+  openProductDialog(product?: ProductDto) {
     const dialogRef = this.dialog.open(ProductFormComponent, {
-      width: '600px',
+      width: '800px',
       data: product
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.loadProducts();
+        this.loadStatistics();
       }
     });
   }
 
-  editProduct(product: Product) {
-    this.openProductDialog(product);
+  editProduct(product: ProductDto) {
+    const dialogRef = this.dialog.open(ProductFormComponent, {
+      width: '800px',
+      data: product
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadProducts();
+        this.loadStatistics();
+        this.snackBar.open('Producto actualizado exitosamente', 'Cerrar', {
+          duration: 3000,
+          panelClass: ['bg-green-600', 'text-white']
+        });
+      }
+    });
   }
 
-  deleteProduct(product: Product) {
-    if (confirm(`¿Está seguro de eliminar el producto ${product.name}?`)) {
-      this.productService.deleteProduct(product.id).subscribe({
-        next: () => {
-          this.loadProducts();
-          this.snackBar.open('Producto eliminado exitosamente', 'Cerrar', {
-            duration: 3000
-          });
-        },
-        error: (error) => {
-          console.error('Error al eliminar producto:', error);
-          this.snackBar.open('Error al eliminar producto', 'Cerrar', {
-            duration: 3000
-          });
-        }
-      });
+  deleteProduct(product: any) {
+    // Asegurarse de capturar el id correctamente (Id o id)
+    const id = product.id ?? product.Id;
+    const name = product.name ?? product.Name;
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: { name }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.productService.deleteProduct(id).subscribe({
+          next: () => {
+            this.loadProducts();
+            this.loadStatistics();
+            this.snackBar.open(`Producto eliminado: ${name}`, 'Cerrar', {
+              duration: 3000,
+              panelClass: ['bg-green-600', 'text-white', 'font-semibold']
+            });
+          },
+          error: (error) => {
+            console.error('Error al eliminar producto:', error);
+            this.snackBar.open('Error al eliminar producto', 'Cerrar', {
+              duration: 3000,
+              panelClass: ['bg-red-600', 'text-white']
+            });
+          }
+        });
+      }
+    });
+  }
+
+  viewMovements(product: ProductDto) {
+    this.productService.getProductMovements(product.id).subscribe({
+      next: (movements) => {
+        // TODO: Implementar vista de movimientos
+        console.log('Movimientos:', movements);
+      }
+    });
+  }
+
+  viewPriceHistory(product: ProductDto) {
+    this.productService.getPriceHistory(product.id).subscribe({
+      next: (history) => {
+        // TODO: Implementar vista de historial de precios
+        console.log('Historial de precios:', history);
+      }
+    });
+  }
+
+  getStockClass(currentStock: number, minimumStock: number): string {
+    if (currentStock <= 0) return 'stock-warning';
+    if (currentStock <= minimumStock) return 'stock-warning';
+    return 'stock-normal';
+  }
+
+  getStockColor(currentStock: number, minimumStock: number): string {
+    if (currentStock <= 0) return 'warn';
+    if (currentStock <= minimumStock) return 'accent';
+    return 'primary';
+  }
+}
+
+// Diálogo de confirmación
+@Component({
+  selector: 'app-confirm-dialog',
+  standalone: true,
+  imports: [MatDialogModule, MatButtonModule, MatIconModule, MatSnackBarModule],
+  template: `
+    <div class="animate-fade-in">
+      <mat-dialog-content class="flex flex-col items-center justify-center py-10 px-8">
+        <div class="flex flex-col items-center mb-4">
+          <mat-icon color="warn" style="font-size: 72px; margin-bottom: 18px; filter: drop-shadow(0 2px 8px #f87171cc);">warning_amber</mat-icon>
+          <h2 class="text-2xl font-bold mb-2 text-center text-red-700">¿Eliminar producto?</h2>
+          <p class="text-center mb-2 text-gray-700" style="max-width: 340px;">
+            ¿Está seguro de que desea eliminar el producto <b class='text-red-600'>{{data.name}}</b>?<br>
+            <span class="text-sm text-gray-500">Esta acción no se puede deshacer.</span>
+          </p>
+        </div>
+      </mat-dialog-content>
+      <mat-dialog-actions align="center" class="pb-4">
+        <button mat-stroked-button mat-dialog-close color="primary" class="mx-2 px-6 py-2 rounded-full transition hover:bg-blue-50">Cancelar</button>
+        <button mat-raised-button color="warn" [mat-dialog-close]="true" class="mx-2 px-6 py-2 rounded-full font-semibold transition hover:bg-red-600 hover:text-white">Sí, eliminar</button>
+      </mat-dialog-actions>
+    </div>
+  `,
+  styles: [`
+    .animate-fade-in {
+      animation: fadeIn 0.3s cubic-bezier(0.4,0,0.2,1);
     }
-  }
-
-  viewMovements(product: Product) {
-    // TODO: Implementar vista de movimientos
-    console.log('Ver movimientos del producto:', product.id);
-  }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  `]
+})
+export class ConfirmDialogComponent {
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { name: string }, private snackBar: MatSnackBar) {}
 } 

@@ -31,15 +31,9 @@ export class AuthService {
   }
 
   changePassword(request: ChangePasswordRequest): Observable<any> {
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
     return this.http.put(
       this.baseUrl + this.changePasswordEndpoint,
-      request,
-      { headers }
+      request
     );
   }
 } 
