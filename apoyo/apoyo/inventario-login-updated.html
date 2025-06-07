@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InventarioApp - Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3a7bd5;
+            --primary-dark: #2d62ae;
+            --secondary: #16a085;
+            --dark: #1c1c2c;
+            --darker: #13131f;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --gray-dark: #343a40;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --info: #3498db;
+            --accent-green: #7FD858;
+            --accent-purple: #8B6BC7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(58, 123, 213, 0.2);
+            border-radius: 50%;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-1000px) translateX(200px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .login-container {
+            background: rgba(28, 28, 44, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            width: 450px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3),
+                        0 0 0 1px rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.6s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(58, 123, 213, 0.1),
+                rgba(127, 216, 88, 0.1)
+            );
+            transform: rotate(45deg);
+            z-index: -1;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-img {
+            max-width: 200px;
+            height: auto;
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 15px;
+            color: var(--light);
+            font-size: 28px;
+            font-weight: 600;
+            display: none; /* Oculto porque ya está en el logo */
+        }
+
+        .login-subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--accent-purple);
+            font-size: 16px;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px 20px;
+            padding-left: 50px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--light);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(58, 123, 213, 0.25);
+            outline: none;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon i {
+            position: absolute;
+            top: 50%;
+            left: 20px;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .input-icon input:focus + i {
+            color: var(--primary);
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            user-select: none;
+        }
+
+        .form-check input {
+            margin-right: 10px;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .form-check input:checked::before {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--primary);
+            font-size: 12px;
+        }
+
+        .form-check label {
+            color: var(--gray);
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(58, 123, 213, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(58, 123, 213, 0.3);
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            100% {
+                transform: scale(100, 100);
+                opacity: 0;
+            }
+        }
+
+        .btn:focus:not(:active)::after {
+            animation: ripple 1s ease-out;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .login-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+            color: var(--primary-dark);
+        }
+
+        .login-footer p {
+            margin-bottom: 10px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .error-message {
+            color: var(--danger);
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            display: none;
+        }
+
+        .error-message i {
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        /* Responsivo */
+        @media (max-width: 500px) {
+            .login-container {
+                width: 90%;
+                padding: 30px 20px;
+            }
+            
+            .logo-img {
+                max-width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Partículas de fondo -->
+    <div class="particles" id="particles"></div>
+
+    <div class="login-container">
+        <div class="login-logo">
+            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxnPgogICAgICAgIDxyZWN0IHdpZHRoPSI1MDAiIGhlaWdodD0iMzAwIiBmaWxsPSJ0cmFuc3BhcmVudCIvPgogICAgICAgIDxnPgogICAgICAgICAgICA8IS0tIEVzdGFkw61zdGljYXMgLyBHcsOhZmljYXMgZGUgYmFycmFzIC0tPgogICAgICAgICAgICA8ZyBmaWxsPSIjNjE0Mjg0Ij4KICAgICAgICAgICAgICAgIDxyZWN0IHg9IjIwOCIgeT0iOTAiIHdpZHRoPSIyNSIgaGVpZ2h0PSI4MCIgLz4KICAgICAgICAgICAgICAgIDxyZWN0IHg9IjI0MCIgeT0iNzAiIHdpZHRoPSIyNSIgaGVpZ2h0PSIxMDAiIC8+CiAgICAgICAgICAgICAgICA8cmVjdCB4PSIyNzIiIHk9IjUwIiB3aWR0aD0iMjUiIGhlaWdodD0iMTIwIiAvPgogICAgICAgICAgICA8L2c+CiAgICAgICAgICAgIDwhLS0gRmxlY2hhcyBibGFuY2FzIC0tPgogICAgICAgICAgICA8ZyBmaWxsPSJ3aGl0ZSI+CiAgICAgICAgICAgICAgICA8cG9seWdvbiBwb2ludHM9IjIyMCw5NSAyMTAsODUgMjMwLDg1IiAvPgogICAgICAgICAgICAgICAgPHBvbHlnb24gcG9pbnRzPSIyNTIsNzUgMjQyLDY1IDI2Miw2NSIgLz4KICAgICAgICAgICAgICAgIDxwb2x5Z29uIHBvaW50cz0iMjg0LDU1IDI3NCw0NSAyOTQsNDUiIC8+CiAgICAgICAgICAgIDwvZz4KICAgICAgICAgICAgPCEtLSBPcmJpdGEgYXp1bCAtLT4KICAgICAgICAgICAgPGVsbGlwc2UgY3g9IjI1MCIgY3k9IjExMCIgcng9IjgwIiByeT0iMjUiIGZpbGw9InRyYW5zcGFyZW50IiBzdHJva2U9IiMzYTdiZDUiIHN0cm9rZS13aWR0aD0iOCIgLz4KICAgICAgICAgICAgPCEtLSBPcmJpdGEgdmVyZGUgLS0+CiAgICAgICAgICAgIDxlbGxpcHNlIGN4PSIyNTAiIGN5PSIxMTAiIHJ4PSI5MCIgcnk9IjM1IiB0cmFuc2Zvcm09InJvdGF0ZSgtMzAgMjUwIDExMCkiIGZpbGw9InRyYW5zcGFyZW50IiBzdHJva2U9IiM3ZmQ4NTgiIHN0cm9rZS13aWR0aD0iOCIgLz4KICAgICAgICA8L2c+CiAgICAgICAgPHRleHQgeD0iMjUwIiB5PSIxOTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5JTlZFTlRBUklPQVBQPC90ZXh0PgogICAgICAgIDx0ZXh0IHg9IjI1MCIgeT0iMjE1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM4YjZiYzciIHRleHQtYW5jaG9yPSJtaWRkbGUiPk9SR0FOSVpBLiBDT05UUk9MQS4gQ1JFQ0UuPC90ZXh0PgogICAgPC9nPgo8L3N2Zz4=" class="logo-img" alt="InventarioApp Logo">
+        </div>
+        
+        <!-- Título oculto ya que está en el logo -->
+        <h2 class="login-title">InventarioApp</h2>
+        
+        <!-- Mensaje de error (oculto por defecto) -->
+        <div class="error-message" id="errorMessage">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>Usuario o contraseña incorrectos. Inténtalo de nuevo.</span>
+        </div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <div class="input-icon">
+                    <input type="text" class="form-control" id="username" placeholder="Usuario" autocomplete="username">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="input-icon">
+                    <input type="password" class="form-control" id="password" placeholder="Contraseña" autocomplete="current-password">
+                    <i class="fas fa-lock"></i>
+                </div>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" id="remember">
+                <label for="remember">Recordar usuario</label>
+            </div>
+            <button type="button" class="btn" id="loginButton">INICIAR SESIÓN</button>
+        </form>
+        
+        <div class="login-footer">
+            <a href="#" id="forgotPassword">¿Olvidaste tu contraseña?</a>
+        </div>
+    </div>
+
+    <script>
+        // Generar partículas
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 20;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Tamaño aleatorio
+                const size = Math.random() * 20 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                
+                // Posición inicial aleatoria
+                const posX = Math.random() * window.innerWidth;
+                const posY = Math.random() * window.innerHeight;
+                particle.style.left = `${posX}px`;
+                particle.style.top = `${posY}px`;
+                
+                // Duración y retraso aleatorios
+                const duration = Math.random() * 20 + 10;
+                const delay = Math.random() * 10;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+                
+                // Color aleatorio (entre azul y verde)
+                const isBlue = Math.random() > 0.5;
+                particle.style.background = isBlue ? 
+                    'rgba(58, 123, 213, 0.2)' : 
+                    'rgba(127, 216, 88, 0.2)';
+                
+                // Agregar partícula al contenedor
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Manejar el inicio de sesión
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Validación simple
+            if (!username || !password) {
+                errorMessage.style.display = 'flex';
+                return;
+            }
+            
+            // Ocultar mensaje de error si estaba visible
+            errorMessage.style.display = 'none';
+            
+            // Simular inicio de sesión exitoso
+            document.getElementById('loginButton').innerHTML = '<i class="fas fa-spinner fa-spin"></i> INICIANDO...';
+            
+            // Redirigir después de una simulación de verificación
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1500);
+        }
+        
+        // Eventos
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            
+            // Evento de clic en botón de inicio de sesión
+            document.getElementById('loginButton').addEventListener('click', handleLogin);
+            
+            // Permitir enviar con Enter
+            document.getElementById('loginForm').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleLogin();
+                }
+            });
+            
+            // Efecto visual en input focus
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('focus', () => {
+                    input.parentElement.style.transform = 'scale(1.02)';
+                });
+                
+                input.addEventListener('blur', () => {
+                    input.parentElement.style.transform = 'scale(1)';
+                });
+            });
+            
+            // Ocultar mensaje de error al escribir
+            document.getElementById('username').addEventListener('input', () => {
+                document.getElementById('errorMessage').style.display = 'none';
+            });
+            
+            document.getElementById('password').addEventListener('input', () => {
+                document.getElementById('errorMessage').style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>

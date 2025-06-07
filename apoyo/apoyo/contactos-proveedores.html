@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InventarioApp - Contactos de Proveedores</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #4285f4;
+      --secondary-color: #f5f5f5;
+      --dark-bg: #1a1a2e;
+      --dark-secondary: #2d2d3a;
+      --text-light: #ffffff;
+      --text-dark: #333;
+      --active: #28a745;
+      --inactive: #dc3545;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+    }
+    
+    body {
+      background-color: var(--dark-bg);
+      color: var(--text-light);
+    }
+    
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background-color: var(--dark-secondary);
+      padding: 20px 0;
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      padding: 0 20px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 20px;
+    }
+    
+    .logo i {
+      color: var(--primary-color);
+      font-size: 24px;
+      margin-right: 10px;
+    }
+    
+    .logo h1 {
+      color: var(--primary-color);
+      font-size: 18px;
+    }
+    
+    .menu-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 20px;
+      color: #a0a0a0;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    
+    .menu-item i {
+      margin-right: 10px;
+      font-size: 16px;
+    }
+    
+    .menu-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: var(--text-light);
+    }
+    
+    .menu-item.active {
+      background-color: rgba(66, 133, 244, 0.2);
+      color: var(--primary-color);
+      border-left: 3px solid var(--primary-color);
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex: 1;
+    }
+    
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .nav-links {
+      display: flex;
+    }
+    
+    .nav-link {
+      margin: 0 15px;
+      color: #a0a0a0;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      color: var(--text-light);
+    }
+    
+    .user-profile {
+      width: 40px;
+      height: 40px;
+      background-color: var(--primary-color);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-light);
+      font-weight: bold;
+    }
+    
+    /* Page Content */
+    .page-content {
+      padding: 30px;
+    }
+    
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .page-title {
+      font-size: 24px;
+      font-weight: 500;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: var(--text-light);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      font-weight: 500;
+    }
+    
+    .btn-primary i {
+      margin-right: 5px;
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 20px;
+    }
+    
+    .tab {
+      padding: 12px 20px;
+      cursor: pointer;
+      color: #a0a0a0;
+      position: relative;
+      font-weight: 500;
+    }
+    
+    .tab.active {
+      color: var(--primary-color);
+    }
+    
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background-color: var(--primary-color);
+    }
+    
+    /* Search and Filter */
+    .search-filter {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    
+    .search-box {
+      position: relative;
+      flex: 1;
+      max-width: 400px;
+    }
+    
+    .search-box i {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #a0a0a0;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 10px 10px 10px 35px;
+      border: none;
+      border-radius: 4px;
+      background-color: var(--dark-secondary);
+      color: var(--text-light);
+    }
+    
+    .filter-select {
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      background-color: var(--dark-secondary);
+      color: var(--text-light);
+      min-width: 200px;
+    }
+    
+    /* Table */
+    .table-container {
+      background-color: var(--dark-secondary);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: 15px;
+      text-align: left;
+    }
+    
+    th {
+      background-color: rgba(0, 0, 0, 0.2);
+      font-weight: 500;
+    }
+    
+    tr:not(:last-child) {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .status {
+      padding: 5px 10px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .status.active {
+      background-color: rgba(40, 167, 69, 0.2);
+      color: var(--active);
+    }
+    
+    .status.inactive {
+      background-color: rgba(220, 53, 69, 0.2);
+      color: var(--inactive);
+    }
+    
+    .action-btn {
+      background: none;
+      border: none;
+      color: #a0a0a0;
+      cursor: pointer;
+      margin: 0 5px;
+      font-size: 16px;
+    }
+    
+    .action-btn:hover {
+      color: var(--text-light);
+    }
+    
+    /* Pagination */
+    .pagination {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      margin-top: 20px;
+    }
+    
+    .pagination-info {
+      margin-right: 20px;
+      color: #a0a0a0;
+    }
+    
+    .pagination-buttons {
+      display: flex;
+      align-items: center;
+    }
+    
+    .pagination-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background-color: var(--dark-secondary);
+      color: #a0a0a0;
+      margin: 0 2px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .pagination-btn.active {
+      background-color: var(--primary-color);
+      color: var(--text-light);
+    }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal {
+      background-color: var(--dark-secondary);
+      border-radius: 8px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-title {
+      font-size: 18px;
+      font-weight: 500;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      color: #a0a0a0;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    
+    .modal-body {
+      padding: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .form-input, .form-select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      background-color: rgba(0, 0, 0, 0.2);
+      color: var(--text-light);
+    }
+    
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 30px;
+    }
+    
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid #a0a0a0;
+      color: #a0a0a0;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    /* Make scrollable but nice */
+    .modal::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .modal::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <i class="fas fa-cubes"></i>
+        <h1>InventarioApp</h1>
+      </div>
+      <a href="#" class="menu-item">
+        <i class="fas fa-chart-line"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-box"></i>
+        <span>Productos</span>
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-tags"></i>
+        <span>Categorías</span>
+      </a>
+      <a href="#" class="menu-item active">
+        <i class="fas fa-truck"></i>
+        <span>Proveedores</span>
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-exchange-alt"></i>
+        <span>Movimientos</span>
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-file-alt"></i>
+        <span>Reportes</span>
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-clipboard-check"></i>
+        <span>Auditoría</span>
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-users"></i>
+        <span>Usuarios</span>
+      </a>
+      <a href="#" class="menu-item">
+        <i class="fas fa-cog"></i>
+        <span>Configuración</span>
+      </a>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header -->
+      <div class="header">
+        <div class="nav-links">
+          <a href="#" class="nav-link">Dashboard</a>
+          <a href="#" class="nav-link">Inventario</a>
+          <a href="#" class="nav-link active">Proveedores</a>
+          <a href="#" class="nav-link">Movimientos</a>
+        </div>
+        <div class="user-profile">A</div>
+      </div>
+      
+      <!-- Page Content -->
+      <div class="page-content">
+        <div class="page-header">
+          <h1 class="page-title">Gestión de Proveedores</h1>
+          <button class="btn-primary" id="openNewSupplierModal">
+            <i class="fas fa-plus"></i> Nuevo Proveedor
+          </button>
+        </div>
+        
+        <div class="tabs">
+          <div class="tab" id="tabProveedores">Proveedores</div>
+          <div class="tab active" id="tabContactos">Contactos de Proveedores</div>
+        </div>
+        
+        <div class="search-filter">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" class="search-input" placeholder="Buscar contacto...">
+          </div>
+          <select class="filter-select">
+            <option value="">Todos los proveedores</option>
+            <option value="Tecnología Moderna S.A.">Tecnología Moderna S.A.</option>
+            <option value="Componentes Electrónicos Inc.">Componentes Electrónicos Inc.</option>
+            <option value="Periféricos Globales S.L.">Periféricos Globales S.L.</option>
+            <option value="Monitores HD Corp.">Monitores HD Corp.</option>
+            <option value="Impresoras Rápidas Ltd.">Impresoras Rápidas Ltd.</option>
+          </select>
+        </div>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Proveedor</th>
+                <th>Cargo</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Juan Pérez</td>
+                <td>Tecnología Moderna S.A.</td>
+                <td>Gerente de Ventas</td>
+                <td>jperez@tecmodern.com</td>
+                <td>+1 555-123-4569</td>
+                <td><span class="status active">Activo</span></td>
+                <td>
+                  <button class="action-btn" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                  <button class="action-btn" title="Editar"><i class="fas fa-edit"></i></button>
+                  <button class="action-btn" title="Eliminar"><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+              <tr>
+                <td>María González</td>
+                <td>Componentes Electrónicos Inc.</td>
+                <td>Directora Comercial</td>
+                <td>mgonzalez@componenteselectronicos.com</td>
+                <td>+1 555-987-6545</td>
+                <td><span class="status active">Activo</span></td>
+                <td>
+                  <button class="action-btn" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                  <button class="action-btn" title="Editar"><i class="fas fa-edit"></i></button>
+                  <button class="action-btn" title="Eliminar"><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+              <tr>
+                <td>Carlos Sánchez</td>
+                <td>Periféricos Globales S.L.</td>
+                <td>Representante de Ventas</td>
+                <td>csanchez@perifericosglobales.com</td>
+                <td>+1 555-789-0123</td>
+                <td><span class="status active">Activo</span></td>
+                <td>
+                  <button class="action-btn" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                  <button class="action-btn" title="Editar"><i class="fas fa-edit"></i></button>
+                  <button class="action-btn" title="Eliminar"><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+              <tr>
+                <td>Ana Rodríguez</td>
+                <td>Monitores HD Corp.</td>
+                <td>Coordinadora de Envíos</td>
+                <td>arodriguez@monitoreshd.com</td>
+                <td>+1 555-321-6540</td>
+                <td><span class="status inactive">Inactivo</span></td>
+                <td>
+                  <button class="action-btn" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                  <button class="action-btn" title="Editar"><i class="fas fa-edit"></i></button>
+                  <button class="action-btn" title="Eliminar"><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+              <tr>
+                <td>Roberto Martinez</td>
+                <td>Impresoras Rápidas Ltd.</td>
+                <td>Soporte Técnico</td>
+                <td>rmartinez@impresorasrapidas.com</td>
+                <td>+1 555-654-9870</td>
+                <td><span class="status active">Activo</span></td>
+                <td>
+                  <button class="action-btn" title="Ver detalles"><i class="fas fa-eye"></i></button>
+                  <button class="action-btn" title="Editar"><i class="fas fa-edit"></i></button>
+                  <button class="action-btn" title="Eliminar"><i class="fas fa-trash"></i></button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="pagination">
+          <div class="pagination-info">Mostrando 1-5 de 12 registros</div>
+          <div class="pagination-buttons">
+            <button class="pagination-btn"><i class="fas fa-angle-double-left"></i></button>
+            <button class="pagination-btn"><i class="fas fa-angle-left"></i></button>
+            <button class="pagination-btn active">1</button>
+            <button class="pagination-btn">2</button>
+            <button class="pagination-btn">3</button>
+            <button class="pagination-btn"><i class="fas fa-angle-right"></i></button>
+            <button class="pagination-btn"><i class="fas fa-angle-double-right"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Nuevo Contacto -->
+  <div class="modal-overlay" id="newContactModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Nuevo Contacto de Proveedor</h2>
+        <button class="modal-close" id="closeContactModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="contactName">Nombre*</label>
+          <input type="text" id="contactName" class="form-input" placeholder="Ingrese el nombre del contacto" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="contactSupplier">Proveedor*</label>
+          <select id="contactSupplier" class="form-select" required>
+            <option value="">Seleccione un proveedor</option>
+            <option value="1">Tecnología Moderna S.A.</option>
+            <option value="2">Componentes Electrónicos Inc.</option>
+            <option value="3">Periféricos Globales S.L.</option>
+            <option value="4">Monitores HD Corp.</option>
+            <option value="5">Impresoras Rápidas Ltd.</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="contactPosition">Cargo*</label>
+          <input type="text" id="contactPosition" class="form-input" placeholder="Ingrese el cargo">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="contactEmail">Email*</label>
+          <input type="email" id="contactEmail" class="form-input" placeholder="Ingrese el email" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="contactPhone">Teléfono*</label>
+          <input type="tel" id="contactPhone" class="form-input" placeholder="Ingrese el teléfono" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="contactNotes">Notas</label>
+          <textarea id="contactNotes" class="form-input" rows="3" placeholder="Ingrese notas adicionales"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <div style="display: flex; align-items: center;">
+            <input type="checkbox" id="contactStatus" checked style="margin-right: 8px;">
+            <label for="contactStatus">Activo</label>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-secondary" id="cancelContact">Cancelar</button>
+          <button class="btn-primary">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal Nuevo Proveedor -->
+  <div class="modal-overlay" id="newSupplierModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Nuevo Proveedor</h2>
+        <button class="modal-close" id="closeSupplierModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="supplierName">Nombre*</label>
+          <input type="text" id="supplierName" class="form-input" placeholder="Ingrese el nombre del proveedor" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="supplierAddress">Dirección*</label>
+          <input type="text" id="supplierAddress" class="form-input" placeholder="Ingrese la dirección" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="supplierEmail">Email*</label>
+          <input type="email" id="supplierEmail" class="form-input" placeholder="Ingrese el email de contacto principal" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="supplierPhone">Teléfono*</label>
+          <input type="tel" id="supplierPhone" class="form-input" placeholder="Ingrese el teléfono de contacto principal" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="supplierTaxId">RFC/NIF*</label>
+          <input type="text" id="supplierTaxId" class="form-input" placeholder="Ingrese el identificador fiscal" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="supplierWebsite">Sitio Web</label>
+          <input type="url" id="supplierWebsite" class="form-input" placeholder="Ingrese el sitio web">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="supplierNotes">Notas</label>
+          <textarea id="supplierNotes" class="form-input" rows="3" placeholder="Ingrese notas adicionales"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Estado</label>
+          <div style="display: flex; align-items: center;">
+            <input type="checkbox" id="supplierStatus" checked style="margin-right: 8px;">
+            <label for="supplierStatus">Activo</label>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-secondary" id="cancelSupplier">Cancelar</button>
+          <button class="btn-primary">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Toggle modals
+    document.getElementById('openNewSupplierModal').addEventListener('click', function() {
+      document.getElementById('newSupplierModal').style.display = 'flex';
+    });
+    
+    document.getElementById('closeSupplierModal').addEventListener('click', function() {
+      document.getElementById('newSupplierModal').style.display = 'none';
+    });
+    
+    document.getElementById('cancelSupplier').addEventListener('click', function() {
+      document.getElementById('newSupplierModal').style.display = 'none';
+    });
+    
+    document.getElementById('closeContactModal').addEventListener('click', function() {
+      document.getElementById('newContactModal').style.display = 'none';
+    });
+    
+    document.getElementById('cancelContact').addEventListener('click', function() {
+      document.getElementById('newContactModal').style.display = 'none';
+    });
+    
+    // Tab switching
+    document.getElementById('tabProveedores').addEventListener('click', function() {
+      document.getElementById('tabProveedores').classList.add('active');
+      document.getElementById('tabContactos').classList.remove('active');
+      // Here you would normally redirect to proveedores.html
+      // For the demo, you can show an alert
+      alert('Redirigiendo a la lista de Proveedores');
+    });
+    
+    // Add New Contact button (we'll add this for completeness)
+    const newContactButton = document.createElement('button');
+    newContactButton.className = 'btn-primary';
+    newContactButton.innerHTML = '<i class="fas fa-plus"></i> Nuevo Contacto';
+    newContactButton.style.marginLeft = '10px';
+    newContactButton.addEventListener('click', function() {
+      document.getElementById('newContactModal').style.display = 'flex';
+    });
+    
+    // Add this button next to the "Nuevo Proveedor" button
+    document.querySelector('.page-header').appendChild(newContactButton);
+  </script>
+</body>
+</html>

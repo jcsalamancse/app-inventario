@@ -1,0 +1,107 @@
+<div class="bg-gray-100 min-h-screen p-4">
+  <div class="mb-6">
+    <div class="bg-white shadow rounded-lg p-6 flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-1">¡Bienvenido, <span class="text-blue-600">{{ username || 'Usuario' }}</span>!</h2>
+        <p class="text-sm text-gray-600">{{ today | date:'fullDate' }} - {{ today | date:'shortTime' }}</p>
+      </div>
+      <div>
+        <button mat-raised-button color="primary" (click)="openChangePasswordDialog()">
+          <mat-icon>lock</mat-icon> Cambiar Contraseña
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-6">
+    <div class="bg-white shadow rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">Panel de control</h3>
+      <p class="text-gray-600 mb-4">Gestiona tu inventario, usuarios y reportes desde un solo lugar.</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-blue-50 rounded-lg p-4 flex items-center gap-4">
+          <div class="bg-blue-100 p-3 rounded-full">
+            <mat-icon class="text-blue-600">inventory_2</mat-icon>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold text-gray-900">{{ stats?.totalProducts || 0 }}</h4>
+            <p class="text-sm text-gray-600">Total Productos</p>
+          </div>
+        </div>
+        <div class="bg-green-50 rounded-lg p-4 flex items-center gap-4">
+          <div class="bg-green-100 p-3 rounded-full">
+            <mat-icon class="text-green-600">swap_horiz</mat-icon>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold text-gray-900">{{ stats?.totalMovements || 0 }}</h4>
+            <p class="text-sm text-gray-600">Movimientos</p>
+          </div>
+        </div>
+        <div class="bg-purple-50 rounded-lg p-4 flex items-center gap-4">
+          <div class="bg-purple-100 p-3 rounded-full">
+            <mat-icon class="text-purple-600">people</mat-icon>
+          </div>
+          <div>
+            <h4 class="text-lg font-bold text-gray-900">{{ stats?.activeUsers || 0 }}</h4>
+            <p class="text-sm text-gray-600">Usuarios Activos</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white shadow rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Movimientos por mes</h3>
+      <div class="h-64">
+        <canvas baseChart [data]="movementChartData" [options]="chartOptions" [type]="'line'"></canvas>
+      </div>
+    </div>
+    <div class="bg-white shadow rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Productos por Categoría</h3>
+      <div class="h-64">
+        <canvas baseChart [data]="categoryChartData" [options]="chartOptions" [type]="'pie'"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="bg-white shadow rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Movimientos recientes</h3>
+      <table class="min-w-full text-left text-gray-900">
+        <thead>
+          <tr>
+            <th class="py-2">Producto</th>
+            <th class="py-2">Tipo</th>
+            <th class="py-2">Cantidad</th>
+            <th class="py-2">Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let mov of stats?.recentMovements">
+            <td class="py-2">{{ mov.productName }}</td>
+            <td class="py-2">{{ mov.type }}</td>
+            <td class="py-2">{{ mov.quantity }}</td>
+            <td class="py-2">{{ mov.date | date:'short' }}</td>
+          </tr>
+          <tr *ngIf="!stats?.recentMovements?.length">
+            <td colspan="4" class="py-2 text-gray-500">No hay movimientos recientes</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="bg-white shadow rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Alertas de Stock</h3>
+      <div class="flex flex-col gap-2">
+        <div *ngIf="stats?.alerts?.length; else noAlerts">
+          <div *ngFor="let alert of stats.alerts" class="flex items-center gap-2 p-2 rounded bg-red-50">
+            <mat-icon class="text-red-600">warning</mat-icon>
+            <span class="text-gray-900">{{ alert.message }}</span>
+          </div>
+        </div>
+        <ng-template #noAlerts>
+          <div class="text-gray-500">No hay alertas de stock.</div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div> 

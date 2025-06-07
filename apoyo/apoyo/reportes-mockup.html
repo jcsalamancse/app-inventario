@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InventarioApp - Sistema de Gestión de Inventario</title>
+  <style>
+    :root {
+      --primary: #1976d2;
+      --primary-dark: #1565c0;
+      --secondary: #f5f5f5;
+      --dark: #1e1e2f;
+      --dark-light: #2d2d3a;
+      --success: #2ecc71;
+      --warning: #f39c12;
+      --danger: #e74c3c;
+      --light: #f8f9fa;
+      --text: #333;
+      --text-secondary: #718096;
+      --border: #e2e8f0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Roboto', sans-serif;
+    }
+
+    body {
+      background-color: var(--dark);
+      color: var(--light);
+    }
+
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Header Styles */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--dark);
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--primary);
+    }
+
+    .logo i {
+      margin-right: 0.5rem;
+      font-size: 1.75rem;
+    }
+
+    .main-nav {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .nav-item {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      color: var(--light);
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+
+    .nav-item:hover, .nav-item.active {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .avatar {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      width: 250px;
+      background-color: var(--dark-light);
+      padding-top: 70px;
+      height: 100vh;
+      position: fixed;
+      overflow-y: auto;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 1rem 0;
+    }
+
+    .sidebar-item {
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      color: var(--light);
+      text-decoration: none;
+      transition: background-color 0.3s;
+      margin: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .sidebar-item:hover, .sidebar-item.active {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-item i {
+      margin-right: 0.75rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Main Content Styles */
+    main {
+      flex: 1;
+      margin-left: 250px;
+      padding: 90px 2rem 2rem;
+    }
+
+    .page-title {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .card {
+      background-color: var(--dark-light);
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+      height: 100%;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-card {
+      text-align: center;
+    }
+
+    .stat-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .product-icon { color: #4299e1; }
+    .category-icon { color: #38b2ac; }
+    .alert-icon { color: #f6ad55; }
+    .report-icon { color: #9f7aea; }
+    
+    /* Table Styles */
+    .table-container {
+      background-color: var(--dark-light);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .table-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .table-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    th {
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+
+    tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .badge-success {
+      background-color: rgba(46, 204, 113, 0.2);
+      color: #2ecc71;
+    }
+
+    .badge-danger {
+      background-color: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--light);
+      cursor: pointer;
+      font-size: 1.1rem;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+    }
+
+    .action-btn:hover {
+      opacity: 1;
+    }
+
+    /* Report Styles */
+    .report-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .chart-container {
+      height: 300px;
+      position: relative;
+      margin-top: 1rem;
+    }
+
+    .top-items {
+      list-style: none;
+    }
+
+    .top-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .top-item-name {
+      flex: 1;
+    }
+
+    .top-item-value {
+      font-weight: 500;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+
+    .progress-value {
+      height: 100%;
+      background-color: var(--primary);
+      border-radius: 4px;
+    }
+
+    /* Filter and Search */
+    .filter-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      background-color: var(--dark-light);
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+    }
+
+    .filter-label {
+      color: var(--text-secondary);
+      margin-right: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .filter-select {
+      background-color: transparent;
+      border: none;
+      color: var(--light);
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .filter-select option {
+      background-color: var(--dark-light);
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+      background-color: var(--dark-light);
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-box i {
+      color: var(--text-secondary);
+      margin-right: 0.5rem;
+    }
+
+    .search-input {
+      background-color: transparent;
+      border: none;
+      color: var(--light);
+      outline: none;
+      flex: 1;
+    }
+
+    .button {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      display: inline-flex;
+      align-items: center;
+      border: none;
+    }
+
+    .button i {
+      margin-right: 0.5rem;
+    }
+
+    .button-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+
+    .button-secondary {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: var(--light);
+    }
+
+    .button-primary:hover {
+      background-color: var(--primary-dark);
+    }
+
+    .button-secondary:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Audit Styles */
+    .audit-item {
+      display: flex;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      background-color: var(--dark-light);
+      border-radius: 8px;
+      position: relative;
+    }
+
+    .audit-timeline {
+      margin-left: 2rem;
+      margin-top: 1rem;
+    }
+
+    .audit-dot {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      left: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .audit-created {
+      background-color: var(--success);
+    }
+
+    .audit-updated {
+      background-color: var(--primary);
+    }
+
+    .audit-deleted {
+      background-color: var(--danger);
+    }
+
+    .audit-content {
+      flex: 1;
+    }
+
+    .audit-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .audit-user {
+      font-weight: 500;
+    }
+
+    .audit-time {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .audit-details {
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    .audit-changes {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .audit-field {
+      font-weight: 500;
+    }
+
+    .audit-old {
+      text-decoration: line-through;
+      color: var(--danger);
+    }
+
+    .audit-new {
+      color: var(--success);
+    }
+  </style>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <i class="fas fa-box-open"></i> InventarioApp
+    </div>
+    <nav class="main-nav">
+      <a href="#" class="nav-item"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+      <a href="#" class="nav-item active"><i class="fas fa-boxes"></i> Inventario</a>
+      <a href="#" class="nav-item"><i class="fas fa-truck"></i> Proveedores</a>
+      <a href="#" class="nav-item"><i class="fas fa-exchange-alt"></i> Movimientos</a>
+    </nav>
+    <div class="avatar">
+      A
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <nav class="sidebar-menu">
+        <a href="#" class="sidebar-item">
+          <i class="fas fa-tachometer-alt"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="fas fa-box"></i>
+          <span>Productos</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="fas fa-tags"></i>
+          <span>Categorías</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="fas fa-truck"></i>
+          <span>Proveedores</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="fas fa-exchange-alt"></i>
+          <span>Movimientos</span>
+        </a>
+        <a href="#" class="sidebar-item active">
+          <i class="fas fa-chart-line"></i>
+          <span>Reportes</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="fas fa-history"></i>
+          <span>Auditoría</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="fas fa-users"></i>
+          <span>Usuarios</span>
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="fas fa-cog"></i>
+          <span>Configuración</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+      <!-- REPORTES VIEW -->
+      <div id="reportes-view">
+        <h1 class="page-title">Reportes y Análisis</h1>
+
+        <div class="card-grid">
+          <div class="card stat-card">
+            <i class="fas fa-chart-line stat-icon product-icon"></i>
+            <div class="stat-value">$128,459</div>
+            <div class="stat-label">Valor total de inventario</div>
+          </div>
+          <div class="card stat-card">
+            <i class="fas fa-shopping-cart stat-icon category-icon"></i>
+            <div class="stat-value">867</div>
+            <div class="stat-label">Movimientos este mes</div>
+          </div>
+          <div class="card stat-card">
+            <i class="fas fa-percentage stat-icon alert-icon"></i>
+            <div class="stat-value">8.2%</div>
+            <div class="stat-label">Crecimiento vs mes anterior</div>
+          </div>
+          <div class="card stat-card">
+            <i class="fas fa-exclamation-triangle stat-icon report-icon"></i>
+            <div class="stat-value">23</div>
+            <div class="stat-label">Productos críticos</div>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <div class="filter-group">
+            <span class="filter-label">Período:</span>
+            <select class="filter-select">
+              <option>Este mes</option>
+              <option>Último trimestre</option>
+              <option>Este año</option>
+              <option>Personalizado</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Categoría:</span>
+            <select class="filter-select">
+              <option>Todas</option>
+              <option>Electrónicos</option>
+              <option>Periféricos</option>
+              <option>Accesorios</option>
+            </select>
+          </div>
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" class="search-input" placeholder="Buscar reporte...">
+          </div>
+          <button class="button button-primary">
+            <i class="fas fa-file-export"></i> Exportar
+          </button>
+        </div>
+
+        <div class="report-grid">
+          <div class="card">
+            <h3 class="table-title">Movimientos de Inventario</h3>
+            <div class="chart-container">
+              <!-- Chart would be rendered here with Chart.js or similar library -->
+              <!-- Mockup representation -->
+              <div style="position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+                <svg width="100%" height="100%" viewBox="0 0 600 300">
+                  <!-- Axis -->
+                  <line x1="50" y1="250" x2="550" y2="250" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                  <line x1="50" y1="50" x2="50" y2="250" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+                  
+                  <!-- Data - Entradas -->
+                  <path d="M50,200 L130,150 L210,180 L290,120 L370,100 L450,130 L530,80" fill="none" stroke="#4299e1" stroke-width="3"/>
+                  <circle cx="50" cy="200" r="4" fill="#4299e1"/>
+                  <circle cx="130" cy="150" r="4" fill="#4299e1"/>
+                  <circle cx="210" cy="180" r="4" fill="#4299e1"/>
+                  <circle cx="290" cy="120" r="4" fill="#4299e1"/>
+                  <circle cx="370" cy="100" r="4" fill="#4299e1"/>
+                  <circle cx="450" cy="130" r="4" fill="#4299e1"/>
+                  <circle cx="530" cy="80" r="4" fill="#4299e1"/>
+                  
+                  <!-- Data - Salidas -->
+                  <path d="M50,220 L130,190 L210,210 L290,170 L370,190 L450,150 L530,180" fill="none" stroke="#e74c3c" stroke-width="3"/>
+                  <circle cx="50" cy="220" r="4" fill="#e74c3c"/>
+                  <circle cx="130" cy="190" r="4" fill="#e74c3c"/>
+                  <circle cx="210" cy="210" r="4" fill="#e74c3c"/>
+                  <circle cx="290" cy="170" r="4" fill="#e74c3c"/>
+                  <circle cx="370" cy="190" r="4" fill="#e74c3c"/>
+                  <circle cx="450" cy="150" r="4" fill="#e74c3c"/>
+                  <circle cx="530" cy="180" r="4" fill="#e74c3c"/>
+                  
+                  <!-- Labels -->
+                  <text x="50" y="270" fill="rgba(255,255,255,0.7)" font-size="12" text-anchor="middle">Ene</text>
+                  <text x="130" y="270" fill="rgba(255,255,255,0.7)" font-size="12" text-anchor="middle">Feb</text>
+                  <text x="210" y="270" fill="rgba(255,255,255,0.7)" font-size="12" text-anchor="middle">Mar</text>
+                  <text x="290" y="270" fill="rgba(255,255,255,0.7)" font-size="12" text-anchor="middle">Abr</text>
+                  <text x="370" y="270" fill="rgba(255,255,255,0.7)" font-size="12" text-anchor="middle">May</text>
+                  <text x="450" y="270" fill="rgba(255,255,255,0.7)" font-size="12" text-anchor="middle">Jun</text>
+                  <text x="530" y="270" fill="rgba(255,255,255,0.7)" font-size="12" text-anchor="middle">Jul</text>
+                  
+                  <!-- Legend -->
+                  <circle cx="50" cy="30" r="4" fill="#4299e1"/>
+                  <text x="60" y="35" fill="rgba(255,255,255,0.9)" font-size="14">Entradas</text>
+                  <circle cx="150" cy="30" r="4" fill="#e74c3c"/>
+                  <text x="160" y="35" fill="rgba(255,255,255,0.9)" font-size="14">Salidas</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="table-title">Productos más activos</h3>
+            <ul class="top-items">
+              <li class="top-item">
+                <div class="top-item-name">Laptop HP EliteBook</div>
+                <div class="top-item-value">124 mov.</div>
+                <div class="progress-bar">
+                  <div class="progress-value" style="width: 92%;"></div>
+                </div>
+              </li>
+              <li class="top-item">
+                <div class="top-item-name">Teclado Mecánico</div>
+                <div class="top-item-value">98 mov.</div>
+                <div class="progress-bar">
+                  <div class="progress-value" style="width: 75%;"></div>
+                </div>
+              </li>
+              <li class="top-item">
+                <div class="top-item-name">Monitor Dell 27"</div>
+                <div class="top-item-value">87 mov.</div>
+                <div class="progress-bar">
+                  <div class="progress-value" style="width: 68%;"></div>
+                </div>
+              </li>
+              <li class="top-item">
+                <div class="top-item-name">Auriculares Bluetooth</div>
+                <div class="top-item-value">72 mov.</div>
+                <div class="progress-bar">
+                  <div class="progress-value" style="width: 55%;"></div>
+                </div>
+              </li>
+              <li class="top-item">
+                <div class="top-item-name">Mouse Inalámbrico</div>
+                <div class="top-item-value">64 mov.</div>
+                <div class="progress-bar">
+                  <div class="progress-value" style="width: 48%;"></div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <h3 class="table-title">Rendimiento por Categoría</h3>
+            <div class="table-actions">
+              <button class="button button-secondary">
+                <i class="fas fa-filter"></i> Filtrar
+              </button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Categoría</th>
+                <th>Productos</th>
+                <th>Valor Total</th>
+                <th>Movimientos</th>
+                <th>Rotación</th>
+                <th>Tendencia</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Laptops</td>
+                <td>28</td>
+                <td>$47,560</td>
+                <td>156</td>
+                <td>Alta</td>
+                <td><i class="fas fa-arrow-up" style="color: #2ecc71;"></i> 8.4%</td>
+              </tr>
+              <tr>
+                <td>Monitores</td>
+                <td>15</td>
+                <td>$32,450</td>
+                <td>87</td>
+                <td>Media</td>
+                <td><i class="fas fa-arrow-up" style="color: #2ecc71;"></i> 3.2%</td>
+              </tr>
+              <tr>
+                <td>Teclados</td>
+                <td>42</td>
+                <td>$12,980</td>
+                <td>183</td>
+                <td>Alta</td>
+                <td><i class="fas fa-arrow-up" style="color: #2ecc71;"></i> 12.7%</td>
+              </tr>
+              <tr>
+                <td>Auriculares</td>
+                <td>36</td>
+                <td>$9,870</td>
+                <td>132</td>
+                <td>Media</td>
+                <td><i class="fas fa-arrow-down" style="color: #e74c3c;"></i> 2.1%</td>
+              </tr>
+              <tr>
+                <td>Mouse</td>
+                <td>28</td>
+                <td>$4,760</td>
+                <td>97</td>
+                <td>Media</td>
+                <td><i class="fas fa-arrow-down" style="color: #e74c3c;"></i> 5.8%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- AUDITORIA VIEW (Hidden by default, toggle with JavaScript in real app) -->
+      <div id="auditoria-view" style="display: none;">
+        <h1 class="page-title">Auditoría del Sistema</h1>
+
+        <div class="filter-row">
+          <div class="filter-group">
+            <span class="filter-label">Tipo:</span>
+            <select class="filter-select">
+              <option>Todos</option>
+              <option>Creación</option>
+              <option>Modificación</option>
+              <option>Eliminación</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Usuario:</span>
+            <select class="filter-select">
+              <option>Todos</option>
+              <option>admin</option>
+              <option>jperez</option>
+              <option>mlopez</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">Fecha:</span>
+            <select class="filter-select">
+              <option>Último mes</option>
+              <option>Últimos 3 meses</option>
+              <option>Este año</option>
+            </select>
+          </div>
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" class="search-input" placeholder="Buscar por descripción...">
+          </div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-header">
+            <h3 class="table-title">Registro de Actividades</h3>
+            <div class="table-actions">
+              <button class="button button-primary">
+                <i class="fas fa-file-export"></i> Exportar
+              </button>
+            </div>
+          </div>
+          
+          <div class="audit-timeline">
+            <div class="audit-item">
+              <div class="audit-dot audit-created"></div>
+              <div class="audit-content">
+                <div class="audit-header">
+                  <span class="audit-user">admin</span>
+                  <span class="audit-time">31/03/2025 14:35:22</span>
+                </div>
+                <div>
+                  <span class="badge badge-success">Creación</span>
+                  Nuevo producto agregado: <strong>Laptop HP EliteBook i7-12700H</strong>
+                </div>
+                <div class="audit-details">
+                  {"id":5842,"nombre":"Laptop HP EliteBook i7-12700H","precio":1899.99,"stock":8,"categoriaId":2}
+                </div>
+              </div>
+            </div>
+            
+            <div class="audit-item">
+              <div class="audit-dot audit-updated"></div>
+              <div class="audit-content">
+                <div class="audit-header">
+                  <span class="audit-user">jperez</span>
+                  <span class="audit-time">30/03/2025 12:18:47</span>
+                </div>
+                <div>
+                  <span class="badge badge-primary" style="background-color: rgba(25, 118, 210, 0.2); color: #1976d2;">Modificación</span>
+                  Producto modificado: <strong>Monitor Dell 27"</strong>
+                </div>
+                <div class="audit-changes">
+                  <div>
+                    

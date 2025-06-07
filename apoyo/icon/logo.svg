@@ -1,0 +1,25 @@
+<svg width="500" height="300" xmlns="http://www.w3.org/2000/svg">
+    <g>
+        <rect width="500" height="300" fill="transparent"/>
+        <g>
+            <!-- Estadísticas / Gráficas de barras -->
+            <g fill="#614284">
+                <rect x="208" y="90" width="25" height="80" />
+                <rect x="240" y="70" width="25" height="100" />
+                <rect x="272" y="50" width="25" height="120" />
+            </g>
+            <!-- Flechas blancas -->
+            <g fill="white">
+                <polygon points="220,95 210,85 230,85" />
+                <polygon points="252,75 242,65 262,65" />
+                <polygon points="284,55 274,45 294,45" />
+            </g>
+            <!-- Orbita azul -->
+            <ellipse cx="250" cy="110" rx="80" ry="25" fill="transparent" stroke="#3a7bd5" stroke-width="8" />
+            <!-- Orbita verde -->
+            <ellipse cx="250" cy="110" rx="90" ry="35" transform="rotate(-30 250 110)" fill="transparent" stroke="#7fd858" stroke-width="8" />
+        </g>
+        <text x="250" y="190" font-family="Arial" font-weight="bold" font-size="24" fill="white" text-anchor="middle">INVENTARIOAPP</text>
+        <text x="250" y="215" font-family="Arial" font-size="12" fill="#8b6bc7" text-anchor="middle">ORGANIZA. CONTROLA. CRECE.</text>
+    </g>
+</svg>

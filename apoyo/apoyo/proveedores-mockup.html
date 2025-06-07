@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proveedores - InventarioApp</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Estilos generales */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #12131a;
+            color: #f5f5f5;
+        }
+        
+        /* Header y navegación principal */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #1a1b25;
+            border-bottom: 1px solid #2a2b3d;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            color: #4a8cff;
+            font-size: 1.4rem;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .logo i {
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+        }
+        
+        .main-nav {
+            display: flex;
+        }
+        
+        .nav-item {
+            padding: 0.5rem 1rem;
+            margin: 0 0.3rem;
+            color: #a3a3a3;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background-color: #2a2b3d;
+            color: white;
+        }
+        
+        .nav-item i {
+            margin-right: 0.5rem;
+        }
+        
+        .user-profile {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #4a8cff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        /* Layout principal */
+        .container {
+            display: flex;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #1a1b25;
+            height: calc(100vh - 70px);
+            border-right: 1px solid #2a2b3d;
+        }
+        
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+        
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 1.5rem;
+            color: #a3a3a3;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar-item:hover, .sidebar-item.active {
+            background-color: #2a2b3d;
+            color: white;
+            border-left: 4px solid #4a8cff;
+        }
+        
+        .sidebar-item i {
+            margin-right: 0.8rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Contenido principal */
+        .main-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            height: calc(100vh - 70px);
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .action-btn {
+            background-color: #4a8cff;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            background-color: #3a7dff;
+        }
+        
+        .action-btn i {
+            margin-right: 0.5rem;
+        }
+        
+        /* Tarjetas y tablas */
+        .card {
+            background-color: #1e1f2e;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #2a2b3d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 0.8rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #2a2b3d;
+        }
+        
+        .data-table th {
+            background-color: #1a1b25;
+            color: #a3a3a3;
+            font-weight: 500;
+        }
+        
+        .data-table tbody tr:hover {
+            background-color: #252635;
+        }
+        
+        .status-badge {
+            padding: 0.3rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+        
+        .status-inactive {
+            background-color: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+        
+        .action-icons {
+            display: flex;
+        }
+        
+        .action-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            cursor: pointer;
+            color: #a3a3a3;
+            transition: all 0.3s ease;
+        }
+        
+        .action-icon:hover {
+            background-color: #2a2b3d;
+            color: white;
+        }
+        
+        .action-icon.view:hover {
+            color: #3498db;
+        }
+        
+        .action-icon.edit:hover {
+            color: #f39c12;
+        }
+        
+        .action-icon.delete:hover {
+            color: #e74c3c;
+        }
+        
+        /* Filtros y búsqueda */
+        .filters {
+            display: flex;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+        
+        .search-input {
+            flex: 1;
+            position: relative;
+        }
+        
+        .search-input input {
+            width: 100%;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            border-radius: 4px;
+            border: 1px solid #2a2b3d;
+            background-color: #252635;
+            color: white;
+        }
+        
+        .search-input i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #a3a3a3;
+        }
+        
+        .filter-select {
+            width: 200px;
+            padding: 0.6rem 1rem;
+            border-radius: 4px;
+            border: 1px solid #2a2b3d;
+            background-color: #252635;
+            color: white;
+        }
+        
+        /* Pestañas */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #2a2b3d;
+            margin-bottom: 1.5rem;
+        }
+        
+        .tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            color: #4a8cff;
+            border-bottom: 3px solid #4a8cff;
+        }
+        
+        .tab:hover:not(.active) {
+            border-bottom: 3px solid #3a3b4d;
+        }
+        
+        /* Paginación */
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        
+        .pagination-text {
+            margin-right: 1rem;
+            color: #a3a3a3;
+        }
+        
+        .pagination-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 0.2rem;
+            cursor: pointer;
+            color: #a3a3a3;
+            transition: all 0.3s ease;
+        }
+        
+        .pagination-btn:hover:not(.disabled), .pagination-btn.active {
+            background-color: #2a2b3d;
+            color: white;
+        }
+        
+        .pagination-btn.disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        /* Modal */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal {
+            background-color: #1e1f2e;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 95%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #2a2b3d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: #a3a3a3;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-close:hover {
+            color: white;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #a3a3a3;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border-radius: 4px;
+            border: 1px solid #2a2b3d;
+            background-color: #252635;
+            color: white;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4a8cff;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border-radius: 4px;
+            border: 1px solid #2a2b3d;
+            background-color: #252635;
+            color: white;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #2a2b3d;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.8rem;
+        }
+        
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+        
+        .btn-secondary {
+            background-color: #2a2b3d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #3a3b4d;
+        }
+        
+        .btn-primary {
+            background-color: #4a8cff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #3a7dff;
+        }
+        
+        /* Checkbox estilizado */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #2a2b3d;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #4a8cff;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Contactos de proveedores */
+        .contact-list {
+            margin-top: 1rem;
+        }
+        
+        .contact-card {
+            background-color: #252635;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .contact-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #4a8cff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 1rem;
+        }
+        
+        .contact-details h4 {
+            margin-bottom: 0.3rem;
+        }
+        
+        .contact-details p {
+            color: #a3a3a3;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .contact-details p i {
+            margin-right: 0.5rem;
+            width: 16px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 0;
+            color: #a3a3a3;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .empty-state p {
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Responsive para tablet y móvil */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar-item span {
+                display: none;
+            }
+            
+            .sidebar-item i {
+                margin-right: 0;
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .main-nav .nav-item span {
+                display: none;
+            }
+            
+            .nav-item i {
+                margin-right: 0;
+                font-size: 1.2rem;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+            
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header principal -->
+    <header class="header">
+        <a href="#" class="logo">
+            <i class="fas fa-boxes"></i>
+            <span>InventarioApp</span>
+        </a>
+        
+        <nav class="main-nav">
+            <a href="#" class="nav-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-boxes"></i>
+                <span>Inventario</span>
+            </a>
+            <a href="#" class="nav-item active">
+                <i class="fas fa-truck"></i>
+                <span>Proveedores</span>
+            </a>
+            <a href="#" class="nav-item">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Movimientos</span>
+            </a>
+        </nav>
+        
+        <div class="user-profile">A</div>
+    </header>
+    
+    <!-- Contenedor principal -->
+    <div class="container">
+        <!-- Sidebar lateral -->
+        <aside class="sidebar">
+            <nav class="sidebar-nav">
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-box"></i>
+                    <span>Productos</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-tags"></i>
+                    <span>Categorías</span>
+                </a>
+                <a href="#" class="sidebar-item active">
+                    <i class="fas fa-truck"></i>
+                    <span>Proveedores</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Movimientos</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Reportes</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>Auditoría</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-users"></i>
+                    <span>Usuarios</span>
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+        </aside>
+        
+        <!-- Contenido principal -->
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Gestión de Proveedores</h1>
+                <button class="action-btn" id="btnAddProveedor">
+                    <i class="fas fa-plus"></i>
+                    <span>Nuevo Proveedor</span>
+                </button>
+            </div>
+            
+            <!-- Tabs para Proveedores y Contactos -->
+            <div class="tabs">
+                <div class="tab active" id="tabProveedores">Proveedores</div>
+                <div class="tab" id="tabContactos">Contactos de Proveedores</div>
+            </div>
+            
+            <!-- Sección de Proveedores -->
+            <div id="seccionProveedores">
+                <div class="filters">
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar proveedor...">
+                    </div>
+                    <select class="filter-select">
+                        <option value="">Todos los estados</option>
+                        <option value="active">Activo</option>
+                        <option value="inactive">Inactivo</option>
+                    </select>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Correo</th>
+                                    <th>Teléfono</th>
+                                    <th>Dirección</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Tecnología Moderna S.A.</td>
+                                    <td>info@tecmodern.com</td>
+                                    <td>+1 555-123-4567</td>
+                                    <td>Calle Innovación 123, Silicon Valley</td>
+                                    <td><span class="status-badge status-active">Activo</span></td>
+                                    <td>
+                                        <div class="action-icons">
+                                            <div class="action-icon view" data-toggle="tooltip" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </div>
+                                            <div class="action-icon edit" data-toggle="tooltip" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </div>
+                                            <div class="action-icon delete" data-toggle="tooltip" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Componentes Electrónicos Inc.</td>
+                                    <td>ventas@componenteselectronicos.com</td>
+                                    <td>+1 555-987-6543</td>
+                                    <td>Av. Circuitos 456, Tech City</td>
+                                    <td><span class="status-badge status-active">Activo</span></td>
+                                    <td>
+                                        <div class="action-icons">
+                                            <div class="action-icon view" data-toggle="tooltip" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </div>
+                                            <div class="action-icon edit" data-toggle="tooltip" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </div>
+                                            <div class="action-icon delete" data-toggle="tooltip" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Periféricos Globales S.L.</td>
+                                    <td>info@perifericosglobales.com</td>
+                                    <td>+1 555-789-0123</td>
+                                    <td>Plaza Teclado 789, Input City</td>
+                                    <td><span class="status-badge status-active">Activo</span></td>
+                                    <td>
+                                        <div class="action-icons">
+                                            <div class="action-icon view" data-toggle="tooltip" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </div>
+                                            <div class="action-icon edit" data-toggle="tooltip" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </div>
+                                            <div class="action-icon delete" data-toggle="tooltip" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Monitores HD Corp.</td>
+                                    <td>ventas@monitoreshd.com</td>
+                                    <td>+1 555-321-6547</td>
+                                    <td>Calle Resolución 4K, Display Town</td>
+                                    <td><span class="status-badge status-inactive">Inactivo</span></td>
+                                    <td>
+                                        <div class="action-icons">
+                                            <div class="action-icon view" data-toggle="tooltip" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </div>
+                                            <div class="action-icon edit" data-toggle="tooltip" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </div>
+                                            <div class="action-icon delete" data-toggle="tooltip" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Impresoras Rápidas Ltd.</td>
+                                    <td>contacto@impresorasrapidas.com</td>
+                                    <td>+1 555-654-9870</td>
+                                    <td>Av. Tinta 1234, Printer Valley</td>
+                                    <td><span class="status-badge status-active">Activo</span></td>
+                                    <td>
+                                        <div class="action-icons">
+                                            <div class="action-icon view" data-toggle="tooltip" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </div>
+                                            <div class="action-icon edit" data-toggle="tooltip" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </div>
+                                            <div class="action-icon delete" data-toggle="tooltip" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="pagination">
+                            <div class="pagination-text">Mostrando 1-5 de 12 registros</div>
+                            <div class="pagination-btn disabled">
+                                <i class="fas fa-angle-double-left"></i>
+                            </div>
+                            <div class="pagination-btn disabled">
+                                <i class="fas fa-angle-left"></i>
+                            </div>
+                            <div class="pagination-btn active">1</div>
+                            <div class="pagination-btn">2</div>
+                            <div class="pagination-btn">3</div>
+                            <div class="pagination-btn">
+                                <i class="fas fa-angle-right"></i>
+                            </div>
+                            <div class="pagination-btn">
+                                <i class="fas fa-angle-double-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sección de Contactos de Proveedores (inicialmente oculta) -->
+            <div id="seccionContactos" style="display: none;">
+                <div class="filters">
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Buscar contacto...">
+                    </div>
+                    <select class="filter-select">
+                        <option value="">Todos los proveedores</option>
+                        <option value="1">Tecnología Moderna S.A.</option>
+                        <option value="2">Componentes Electrónicos Inc.</option>
+                        <option value="3">Periféricos Globales S.L.</option>
+                        <option value="4">Monitores HD Corp.</option>
+                        <option value="5">Impresoras Rápidas Ltd.</option>
+                    </select>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Contactos de Proveedores</h2>
+                        <button class="action-btn" id="btnAddContacto">
+                            <i class="fas fa-plus"></i>
+                            <span>Nuevo Contacto</span>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="contact-list">
+                            <div class="contact-card">
+                                <div class="contact-info">
+                                    <div class="contact-avatar">JD</div>
+                                    <div class="contact-details">
+                                        <h4>Juan Díaz</h4>
+                                        <p><i class="fas fa-building"></i> Tecnología Moderna S.A.</p>
+                                        <p><i class="fas fa-briefcase"></i> Gerente de Ventas</p>
+                                        <p><i class="fas fa-envelope"></i> juan.diaz@tecmodern.com</p>
+                                        <p><i class="fas fa-phone"></i> +1 555-111-2233</p>
+                                    </div>
+                                </div>
+                                <div class="action-icons">
+                                    <div class="action-icon edit
