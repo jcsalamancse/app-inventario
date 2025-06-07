@@ -18,18 +18,21 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
 import { UsersRoutingModule } from './users-routing.module';
-import { UsersListComponent } from './components/users-list/users-list.component';
+import { UserListComponent } from './components/user-list/user-list.component';
 import { UserFormComponent } from './components/user-form/user-form.component';
 import { RolesListComponent } from './components/roles-list/roles-list.component';
 import { RoleFormComponent } from './components/role-form/role-form.component';
 import { SharedModule } from '../../shared/shared.module';
+import { UsersComponent } from './users.component';
+import { UserService } from './services/user.service';
 
 @NgModule({
   declarations: [
-    UsersListComponent,
+    UserListComponent,
     UserFormComponent,
     RolesListComponent,
-    RoleFormComponent
+    RoleFormComponent,
+    UsersComponent
   ],
   imports: [
     CommonModule,
@@ -51,6 +54,9 @@ import { SharedModule } from '../../shared/shared.module';
     MatCheckboxModule,
     UsersRoutingModule,
     SharedModule
+  ],
+  providers: [
+    UserService
   ]
 })
 export class UsersModule { } 

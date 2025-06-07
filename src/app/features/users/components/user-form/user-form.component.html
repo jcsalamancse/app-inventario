@@ -1,0 +1,69 @@
+<h2 mat-dialog-title>{{ data ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-dialog-content>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <mat-form-field appearance="fill">
+        <mat-label>Usuario</mat-label>
+        <input matInput formControlName="userName" placeholder="Usuario">
+        <mat-error *ngIf="form.get('userName')?.hasError('required')">
+          El usuario es requerido
+        </mat-error>
+        <mat-error *ngIf="form.get('userName')?.hasError('minlength')">
+          Mínimo 3 caracteres
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" placeholder="Email">
+        <mat-error *ngIf="form.get('email')?.hasError('required')">
+          El email es requerido
+        </mat-error>
+        <mat-error *ngIf="form.get('email')?.hasError('email')">
+          Email inválido
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="firstName" placeholder="Nombre">
+        <mat-error *ngIf="form.get('firstName')?.hasError('required')">
+          El nombre es requerido
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Apellido</mat-label>
+        <input matInput formControlName="lastName" placeholder="Apellido">
+        <mat-error *ngIf="form.get('lastName')?.hasError('required')">
+          El apellido es requerido
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Rol</mat-label>
+        <mat-select formControlName="roleId">
+          <mat-option *ngFor="let role of roles" [value]="role.id">{{role.name}}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('roleId')?.hasError('required')">
+          El rol es requerido
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="fill" *ngIf="!data">
+        <mat-label>Contraseña</mat-label>
+        <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password">
+        <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+          <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+        <mat-error *ngIf="form.get('password')?.hasError('required')">
+          La contraseña es requerida
+        </mat-error>
+        <mat-error *ngIf="form.get('password')?.hasError('minlength')">
+          Mínimo 6 caracteres
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="close()">Cancelar</button>
+    <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || loading">
+      {{ data ? 'Actualizar' : 'Crear' }}
+    </button>
+  </mat-dialog-actions>
+</form> 
