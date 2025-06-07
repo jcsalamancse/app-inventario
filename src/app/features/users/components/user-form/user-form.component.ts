@@ -27,48 +27,48 @@ import { User, UserCreateDto, UserUpdateDto } from '../../models/user.model';
       <h2 class="text-2xl font-bold mb-6">{{data ? 'Editar' : 'Crear'}} Usuario</h2>
       
       <form [formGroup]="userForm" (ngSubmit)="onSubmit()" class="space-y-4">
-        <mat-form-field class="w-full" *ngIf="!data">
+        <mat-form-field class="w-full">
           <mat-label>Nombre de Usuario</mat-label>
-          <input matInput formControlName="userName" required>
-          <mat-error *ngIf="userForm.get('userName')?.hasError('required')">
+          <input matInput formControlName="UserName" required>
+          <mat-error *ngIf="userForm.get('UserName')?.hasError('required')">
             El nombre de usuario es requerido
           </mat-error>
         </mat-form-field>
 
         <mat-form-field class="w-full">
           <mat-label>Nombre</mat-label>
-          <input matInput formControlName="firstName" required>
-          <mat-error *ngIf="userForm.get('firstName')?.hasError('required')">
+          <input matInput formControlName="FirstName" required>
+          <mat-error *ngIf="userForm.get('FirstName')?.hasError('required')">
             El nombre es requerido
           </mat-error>
         </mat-form-field>
 
         <mat-form-field class="w-full">
           <mat-label>Apellido</mat-label>
-          <input matInput formControlName="lastName" required>
-          <mat-error *ngIf="userForm.get('lastName')?.hasError('required')">
+          <input matInput formControlName="LastName" required>
+          <mat-error *ngIf="userForm.get('LastName')?.hasError('required')">
             El apellido es requerido
           </mat-error>
         </mat-form-field>
 
         <mat-form-field class="w-full">
           <mat-label>Email</mat-label>
-          <input matInput formControlName="email" type="email" required>
-          <mat-error *ngIf="userForm.get('email')?.hasError('required')">
+          <input matInput formControlName="Email" type="email" required>
+          <mat-error *ngIf="userForm.get('Email')?.hasError('required')">
             El email es requerido
           </mat-error>
-          <mat-error *ngIf="userForm.get('email')?.hasError('email')">
+          <mat-error *ngIf="userForm.get('Email')?.hasError('email')">
             Ingrese un email válido
           </mat-error>
         </mat-form-field>
 
         <mat-form-field class="w-full">
           <mat-label>Rol</mat-label>
-          <mat-select formControlName="roleId" required>
+          <mat-select formControlName="RoleId" required>
             <mat-option [value]="1">Administrador</mat-option>
             <mat-option [value]="2">Usuario</mat-option>
           </mat-select>
-          <mat-error *ngIf="userForm.get('roleId')?.hasError('required')">
+          <mat-error *ngIf="userForm.get('RoleId')?.hasError('required')">
             El rol es requerido
           </mat-error>
         </mat-form-field>
@@ -76,26 +76,32 @@ import { User, UserCreateDto, UserUpdateDto } from '../../models/user.model';
         <div *ngIf="!data" class="space-y-4">
           <mat-form-field class="w-full">
             <mat-label>Contraseña</mat-label>
-            <input matInput formControlName="password" type="password" required>
-            <mat-error *ngIf="userForm.get('password')?.hasError('required')">
+            <input matInput formControlName="Password" type="password" required>
+            <mat-error *ngIf="userForm.get('Password')?.hasError('required')">
               La contraseña es requerida
             </mat-error>
-            <mat-error *ngIf="userForm.get('password')?.hasError('minlength')">
+            <mat-error *ngIf="userForm.get('Password')?.hasError('minlength')">
               La contraseña debe tener al menos 6 caracteres
             </mat-error>
           </mat-form-field>
 
           <mat-form-field class="w-full">
             <mat-label>Confirmar Contraseña</mat-label>
-            <input matInput formControlName="confirmPassword" type="password" required>
-            <mat-error *ngIf="userForm.get('confirmPassword')?.hasError('required')">
+            <input matInput formControlName="ConfirmPassword" type="password" required>
+            <mat-error *ngIf="userForm.get('ConfirmPassword')?.hasError('required')">
               La confirmación de contraseña es requerida
             </mat-error>
-            <mat-error *ngIf="userForm.get('confirmPassword')?.hasError('passwordMismatch')">
+            <mat-error *ngIf="userForm.get('ConfirmPassword')?.hasError('passwordMismatch')">
               Las contraseñas no coinciden
             </mat-error>
           </mat-form-field>
         </div>
+
+        <mat-form-field class="w-full" *ngIf="data">
+          <mat-label>Nueva Contraseña</mat-label>
+          <input matInput formControlName="NewPassword" type="password">
+          <mat-hint>Déjalo vacío si no deseas cambiar la contraseña</mat-hint>
+        </mat-form-field>
 
         <div class="flex justify-end gap-4 mt-6">
           <button 
@@ -128,32 +134,33 @@ export class UserFormComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {
     this.userForm = this.fb.group({
-      userName: ['', Validators.required],
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      roleId: [2, Validators.required],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required]
+      UserName: ['', Validators.required],
+      FirstName: ['', Validators.required],
+      LastName: ['', Validators.required],
+      Email: ['', [Validators.required, Validators.email]],
+      RoleId: [2, Validators.required],
+      Password: ['', [!data ? Validators.required : Validators.nullValidator, Validators.minLength(6)]],
+      ConfirmPassword: ['', !data ? Validators.required : Validators.nullValidator],
+      NewPassword: ['']
     }, { validator: this.passwordMatchValidator });
 
     if (data) {
       this.userForm.patchValue({
+        UserName: data.UserName,
         FirstName: data.FirstName,
         LastName: data.LastName,
         Email: data.Email,
         RoleId: data.RoleId
       });
-      this.userForm.get('password')?.clearValidators();
-      this.userForm.get('confirmPassword')?.clearValidators();
-      this.userForm.get('userName')?.clearValidators();
+      this.userForm.get('Password')?.clearValidators();
+      this.userForm.get('ConfirmPassword')?.clearValidators();
     }
   }
 
   ngOnInit(): void {}
 
   passwordMatchValidator(g: FormGroup) {
-    return g.get('password')?.value === g.get('confirmPassword')?.value
+    return g.get('Password')?.value === g.get('ConfirmPassword')?.value
       ? null : { passwordMismatch: true };
   }
 
@@ -162,12 +169,16 @@ export class UserFormComponent implements OnInit {
       const formValue = this.userForm.value;
       
       if (this.data) {
-        const updateObj: Partial<User> = {
+        const updateObj: any = {
+          UserName: formValue.UserName,
           FirstName: formValue.FirstName,
           LastName: formValue.LastName,
           Email: formValue.Email,
           RoleId: formValue.RoleId
         };
+        if (formValue.NewPassword) {
+          updateObj.Password = formValue.NewPassword;
+        }
 
         this.userService.updateUser(this.data.Id, updateObj).subscribe({
           next: () => {
@@ -185,12 +196,12 @@ export class UserFormComponent implements OnInit {
         });
       } else {
         const createObj: any = {
-          UserName: formValue.userName,
-          FirstName: formValue.firstName,
-          LastName: formValue.lastName,
-          Email: formValue.email,
-          RoleId: formValue.roleId,
-          Password: formValue.password
+          UserName: formValue.UserName,
+          FirstName: formValue.FirstName,
+          LastName: formValue.LastName,
+          Email: formValue.Email,
+          RoleId: formValue.RoleId,
+          Password: formValue.Password
         };
 
         this.userService.createUser(createObj).subscribe({

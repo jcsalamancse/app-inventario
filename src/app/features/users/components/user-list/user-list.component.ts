@@ -67,6 +67,12 @@ import { UserFormComponent } from '../user-form/user-form.component';
             <td mat-cell *matCellDef="let user">{{user.Id}}</td>
           </ng-container>
 
+          <!-- Username Column -->
+          <ng-container matColumnDef="username">
+            <th mat-header-cell *matHeaderCellDef>Usuario</th>
+            <td mat-cell *matCellDef="let user">{{user.UserName}}</td>
+          </ng-container>
+
           <!-- Name Column -->
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Nombre</th>
@@ -138,7 +144,7 @@ import { UserFormComponent } from '../user-form/user-form.component';
 })
 export class UserListComponent implements OnInit {
   users: User[] = [];
-  displayedColumns: string[] = ['id', 'name', 'email', 'role', 'status', 'actions'];
+  displayedColumns: string[] = ['id', 'username', 'name', 'email', 'role', 'status', 'actions'];
   totalItems = 0;
   pageSize = 10;
   currentPage = 1;
@@ -169,8 +175,23 @@ export class UserListComponent implements OnInit {
     this.userService.getUsers()
       .subscribe({
         next: (users: User[]) => {
-          this.users = users;
-          this.totalItems = users.length;
+          // Filtro local mejorado: insensible a mayúsculas/minúsculas y espacios
+          const term = this.searchTerm.trim().toLowerCase();
+          let filtered = users;
+          if (term) {
+            filtered = users.filter(u => {
+              const fullName = `${u.FirstName || ''} ${u.LastName || ''}`.toLowerCase();
+              return (
+                (u.FirstName && u.FirstName.toLowerCase().includes(term)) ||
+                (u.LastName && u.LastName.toLowerCase().includes(term)) ||
+                (u.Email && u.Email.toLowerCase().includes(term)) ||
+                (u.UserName && u.UserName.toLowerCase().includes(term)) ||
+                fullName.includes(term)
+              );
+            });
+          }
+          this.users = filtered;
+          this.totalItems = filtered.length;
         },
         error: (error: any) => {
           this.snackBar.open('Error al cargar usuarios', 'Cerrar', {
@@ -205,20 +226,20 @@ export class UserListComponent implements OnInit {
   }
 
   toggleUserStatus(user: User): void {
-    this.userService.updateUserStatus(user.Id, !user.IsActive).subscribe({
+    this.userService.deleteUser(user.Id).subscribe({
       next: () => {
         this.loadUsers();
         this.snackBar.open(
-          `Usuario ${user.IsActive ? 'desactivado' : 'activado'} exitosamente`,
+          `Usuario eliminado exitosamente`,
           'Cerrar',
           { duration: 3000 }
         );
       },
       error: (error: any) => {
-        this.snackBar.open('Error al cambiar estado del usuario', 'Cerrar', {
+        this.snackBar.open('Error al eliminar usuario', 'Cerrar', {
           duration: 3000
         });
-        console.error('Error toggling user status:', error);
+        console.error('Error eliminando usuario:', error);
       }
     });
   }

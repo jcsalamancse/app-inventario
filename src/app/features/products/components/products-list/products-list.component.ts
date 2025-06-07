@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatTableModule, MatTable } from '@angular/material/table';
+import { MatTableModule, MatTable, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
@@ -273,7 +273,7 @@ export class ProductsListComponent implements OnInit {
     'createdAt',
     'actions'
   ];
-  dataSource: any;
+  dataSource: MatTableDataSource<ProductDto> = new MatTableDataSource<ProductDto>([]);
   filter: ProductFilter = {};
   categories: any[] = [];
   loading = false;
@@ -323,16 +323,32 @@ export class ProductsListComponent implements OnInit {
           duration: 5000
         });
         this.loading = false;
-        return of({ Items: [], TotalCount: 0 });
+        return of({
+          Items: { $values: [] },
+          TotalCount: 0,
+          PageNumber: 1,
+          PageSize: 10,
+          TotalPages: 1,
+          HasPreviousPage: false,
+          HasNextPage: false
+        });
       })
     ).subscribe({
       next: (response) => {
-        this.dataSource = response.Items;
-        this.totalProducts = response.TotalCount;
+        if (response && response.Items && Array.isArray(response.Items.$values)) {
+          this.dataSource.data = response.Items.$values;
+          this.totalProducts = response.TotalCount;
+        } else {
+          this.dataSource.data = [];
+          this.totalProducts = 0;
+          console.error('Formato de respuesta inválido:', response);
+        }
         this.loading = false;
       },
       error: (error) => {
         this.loading = false;
+        this.dataSource.data = [];
+        this.totalProducts = 0;
       }
     });
   }
@@ -342,11 +358,15 @@ export class ProductsListComponent implements OnInit {
     this.productService.getLowStockProducts().pipe(
       catchError(error => {
         console.error('Error al cargar productos con stock bajo:', error);
-        return of([]);
+        return of({ $values: [] });
       })
     ).subscribe({
-      next: (products) => {
-        this.lowStockCount = products.length;
+      next: (response) => {
+        if (response && response.$values) {
+          this.lowStockCount = response.$values.length;
+        } else {
+          this.lowStockCount = 0;
+        }
       }
     });
 
@@ -355,19 +375,24 @@ export class ProductsListComponent implements OnInit {
       catchError(error => {
         console.error('Error al cargar estadísticas:', error);
         return of({
-          Items: [],
+          Items: { $values: [] },
           TotalCount: 0,
           PageNumber: 1,
           PageSize: 10,
           TotalPages: 1,
           HasPreviousPage: false,
           HasNextPage: false
-        } as ProductPaginationResult);
+        });
       })
     ).subscribe({
-      next: (response: ProductPaginationResult) => {
-        this.activeProducts = response.Items.filter((p: any) => p.IsActive).length;
-        this.totalValue = response.Items.reduce((sum: number, p: any) => sum + (p.Price * p.CurrentStock), 0);
+      next: (response) => {
+        if (response && response.Items && response.Items.$values) {
+          this.activeProducts = response.Items.$values.filter((p: any) => p.IsActive).length;
+          this.totalValue = response.Items.$values.reduce((sum: number, p: any) => sum + (p.Price * p.CurrentStock), 0);
+        } else {
+          this.activeProducts = 0;
+          this.totalValue = 0;
+        }
       }
     });
   }

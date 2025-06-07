@@ -43,7 +43,9 @@ export interface ProductDto {
 }
 
 export interface ProductPaginationResult {
-  Items: ProductDto[];
+  Items: {
+    $values: ProductDto[];
+  };
   TotalCount: number;
   PageNumber: number;
   PageSize: number;

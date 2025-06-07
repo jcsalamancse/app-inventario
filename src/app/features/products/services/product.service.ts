@@ -55,8 +55,8 @@ export class ProductService {
     return this.http.patch<Product>(`${this.apiUrl}/${id}/stock`, { quantity });
   }
 
-  getLowStockProducts(): Observable<ProductDto[]> {
-    return this.http.get<ProductDto[]>(`${this.apiUrl}/low-stock`);
+  getLowStockProducts(): Observable<{ $values: ProductDto[] }> {
+    return this.http.get<{ $values: ProductDto[] }>(`${this.apiUrl}/low-stock`);
   }
 
   getProductMovements(id: number): Observable<any> {
