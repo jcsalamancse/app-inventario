@@ -1,0 +1,58 @@
+<h2 mat-dialog-title class="text-xl font-bold text-gray-800">
+  Permisos del Rol: {{ data.roleName }}
+</h2>
+<mat-dialog-content class="py-2">
+  <div *ngIf="loading" class="flex justify-center items-center py-8">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+  <div *ngIf="!loading">
+    <mat-form-field appearance="fill" class="w-full mb-4">
+      <mat-label>Buscar permiso</mat-label>
+      <input matInput [(ngModel)]="search" placeholder="Nombre o código del permiso">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Permisos asignados -->
+      <div>
+        <h3 class="font-semibold mb-2">Asignados</h3>
+        <mat-list *ngIf="filterPermissions(assignedPermissions).length; else noAssigned">
+          <mat-list-item *ngFor="let p of filterPermissions(assignedPermissions)">
+            <div class="flex flex-col">
+              <span class="font-medium">{{p.name}}</span>
+              <span class="text-xs text-gray-500">{{p.code}}</span>
+            </div>
+            <button mat-icon-button color="warn" (click)="removePermission(p)" [disabled]="removing">
+              <mat-icon>remove_circle</mat-icon>
+            </button>
+          </mat-list-item>
+        </mat-list>
+        <ng-template #noAssigned>
+          <div class="text-gray-400 text-sm">No hay permisos asignados.</div>
+        </ng-template>
+      </div>
+
+      <!-- Permisos disponibles -->
+      <div>
+        <h3 class="font-semibold mb-2">Disponibles</h3>
+        <mat-list *ngIf="filterPermissions(availablePermissions).length; else noAvailable">
+          <mat-list-item *ngFor="let p of filterPermissions(availablePermissions)">
+            <div class="flex flex-col">
+              <span class="font-medium">{{p.name}}</span>
+              <span class="text-xs text-gray-500">{{p.code}}</span>
+            </div>
+            <button mat-icon-button color="primary" (click)="addPermission(p)" [disabled]="adding">
+              <mat-icon>add_circle</mat-icon>
+            </button>
+          </mat-list-item>
+        </mat-list>
+        <ng-template #noAvailable>
+          <div class="text-gray-400 text-sm">No hay permisos disponibles para agregar.</div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end" class="mt-4">
+  <button mat-button (click)="close()">Cerrar</button>
+</mat-dialog-actions> 
