@@ -1,42 +1,46 @@
-<h2 mat-dialog-title class="text-xl font-bold text-gray-800">
-  {{ data ? 'Editar Rol' : 'Nuevo Rol' }}
-</h2>
+<div class="p-6 max-w-4xl mx-auto">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">
+      {{ data ? 'Editar Rol' : 'Nuevo Rol' }}
+    </h2>
+    <p class="text-gray-600 mt-1">
+      {{ data ? 'Modifica los datos del rol existente' : 'Completa los datos para crear un nuevo rol' }}
+    </p>
+  </div>
 
-<form [formGroup]="form" (ngSubmit)="save()" class="p-4">
-  <mat-dialog-content>
-    <div class="grid grid-cols-1 gap-4">
-      <!-- Nombre -->
-      <mat-form-field appearance="fill">
-        <mat-label>Nombre del Rol</mat-label>
-        <input matInput formControlName="name" placeholder="Ej: Administrador">
-        <mat-error *ngIf="form.get('name')?.hasError('required')">
-          El nombre es requerido
-        </mat-error>
-        <mat-error *ngIf="form.get('name')?.hasError('minlength')">
-          El nombre debe tener al menos 3 caracteres
-        </mat-error>
-      </mat-form-field>
+  <form [formGroup]="form" (ngSubmit)="save()" class="space-y-6">
+    <!-- Información básica -->
+    <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
+      <h3 class="text-lg font-semibold text-gray-700">Información Básica</h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Nombre del Rol</mat-label>
+          <input matInput formControlName="name" placeholder="Ej: Administrador">
+          <mat-error *ngIf="form.get('name')?.hasError('required')">
+            El nombre es requerido
+          </mat-error>
+          <mat-error *ngIf="form.get('name')?.hasError('minlength')">
+            El nombre debe tener al menos 3 caracteres
+          </mat-error>
+        </mat-form-field>
 
-      <!-- Código -->
-      <mat-form-field appearance="fill">
-        <mat-label>Código del Rol</mat-label>
-        <mat-select formControlName="code" placeholder="Selecciona un código">
-          <mat-option *ngFor="let p of permissions" [value]="p.code">{{p.code}} - {{p.name}}</mat-option>
-        </mat-select>
-        <mat-error *ngIf="form.get('code')?.hasError('required')">
-          El código es requerido
-        </mat-error>
-      </mat-form-field>
+        <mat-form-field appearance="outline" class="w-full">
+          <mat-label>Código</mat-label>
+          <input matInput formControlName="code" placeholder="Ej: ADMIN">
+          <mat-error *ngIf="form.get('code')?.hasError('required')">
+            El código es requerido
+          </mat-error>
+        </mat-form-field>
+      </div>
 
-      <!-- Descripción -->
-      <mat-form-field appearance="fill">
+      <mat-form-field appearance="outline" class="w-full">
         <mat-label>Descripción</mat-label>
         <textarea matInput formControlName="description" rows="3" 
-                  placeholder="Descripción del rol y sus permisos"></textarea>
+                  placeholder="Describe el propósito y alcance de este rol"></textarea>
       </mat-form-field>
 
-      <!-- Estado y Rol por Defecto -->
-      <div class="flex flex-col gap-2">
+      <div class="flex flex-wrap gap-4">
         <mat-checkbox formControlName="isActive" color="primary">
           Rol Activo
         </mat-checkbox>
@@ -45,16 +49,74 @@
         </mat-checkbox>
       </div>
     </div>
-  </mat-dialog-content>
 
-  <mat-dialog-actions align="end" class="mt-4">
-    <button mat-button type="button" (click)="close()" [disabled]="loading">
-      Cancelar
-    </button>
-    <button mat-raised-button color="primary" type="submit" 
-            [disabled]="form.invalid || loading">
-      <mat-spinner diameter="20" *ngIf="loading" class="mr-2"></mat-spinner>
-      {{ data ? 'Actualizar' : 'Crear' }}
-    </button>
-  </mat-dialog-actions>
-</form> 
+    <!-- Gestión de Permisos -->
+    <div class="bg-white rounded-lg shadow-sm p-6 space-y-4">
+      <h3 class="text-lg font-semibold text-gray-700">Permisos</h3>
+      
+      <!-- Búsqueda de permisos -->
+      <div class="relative">
+        <input type="text" 
+               [(ngModel)]="searchTerm" 
+               [ngModelOptions]="{standalone: true}"
+               placeholder="Buscar permisos..."
+               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <mat-icon class="absolute right-3 top-2.5 text-gray-400">search</mat-icon>
+      </div>
+
+      <!-- Permisos seleccionados -->
+      <div class="space-y-2">
+        <h4 class="text-sm font-medium text-gray-600">Permisos Asignados</h4>
+        <div class="flex flex-wrap gap-2">
+          <mat-chip *ngFor="let permission of selectedPermissions" 
+                   [removable]="true"
+                   (removed)="removePermission(permission)"
+                   class="bg-blue-100 text-blue-800">
+            {{permission.name}}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip>
+          <span *ngIf="selectedPermissions.length === 0" class="text-gray-500 text-sm">
+            No hay permisos asignados
+          </span>
+        </div>
+      </div>
+
+      <!-- Lista de permisos disponibles -->
+      <div class="space-y-2">
+        <h4 class="text-sm font-medium text-gray-600">Permisos Disponibles</h4>
+        <div class="max-h-60 overflow-y-auto border border-gray-200 rounded-lg">
+          <div *ngFor="let permission of filteredPermissions"
+               class="p-3 hover:bg-gray-50 cursor-pointer flex items-center justify-between"
+               (click)="addPermission(permission)">
+            <div>
+              <div class="font-medium">{{permission.name}}</div>
+              <div class="text-sm text-gray-500">{{permission.code}}</div>
+            </div>
+            <mat-icon class="text-gray-400">add_circle</mat-icon>
+          </div>
+          <div *ngIf="filteredPermissions.length === 0" 
+               class="p-4 text-center text-gray-500">
+            No hay permisos disponibles
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="flex justify-end gap-3">
+      <button type="button" 
+              mat-button 
+              (click)="close()"
+              class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+        Cancelar
+      </button>
+      <button type="submit" 
+              mat-raised-button 
+              color="primary"
+              [disabled]="form.invalid || loading"
+              class="px-4 py-2">
+        <mat-spinner diameter="20" *ngIf="loading" class="mr-2"></mat-spinner>
+        {{ data ? 'Actualizar' : 'Crear' }}
+      </button>
+    </div>
+  </form> 
