@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -43,7 +43,10 @@ import { PermissionService } from '../../services/permission.service';
 
         <mat-form-field class="w-full mb-4">
           <mat-label>Código</mat-label>
-          <input matInput formControlName="code">
+          <input matInput formControlName="code" required>
+          <mat-error *ngIf="form.get('code')?.hasError('required')">
+            El código es requerido
+          </mat-error>
         </mat-form-field>
 
         <mat-form-field class="w-full mb-4">
@@ -54,6 +57,18 @@ import { PermissionService } from '../../services/permission.service';
         <mat-form-field class="w-full mb-4">
           <mat-label>Módulo</mat-label>
           <input matInput formControlName="module">
+        </mat-form-field>
+
+        <mat-form-field class="w-full mb-4">
+          <mat-label>Acciones</mat-label>
+          <mat-select formControlName="actions" multiple>
+            <mat-option *ngFor="let action of actionList" [value]="action">
+              {{action}}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('actions')?.hasError('required')">
+            Selecciona al menos una acción
+          </mat-error>
         </mat-form-field>
 
         <div class="flex justify-end gap-2">
@@ -69,6 +84,7 @@ import { PermissionService } from '../../services/permission.service';
   `
 })
 export class PermissionFormComponent {
+  actionList = ['CREATE', 'READ', 'UPDATE', 'DELETE'];
   form: FormGroup;
 
   constructor(
@@ -79,17 +95,38 @@ export class PermissionFormComponent {
   ) {
     this.form = this.fb.group({
       name: [data?.name || '', Validators.required],
-      code: [data?.code || ''],
+      code: [
+        data?.code || '',
+        [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.pattern(/^[A-Z0-9_]+$/)
+        ]
+      ],
       description: [data?.description || ''],
-      module: [data?.module || '']
+      module: [data?.module || ''],
+      actions: this.fb.array(
+        this.actionList.map((a: string) => data?.action === a ? true : false),
+        [Validators.required]
+      )
     });
+  }
+
+  get actionsArray() {
+    return this.form.get('actions') as FormArray;
   }
 
   onSubmit() {
     if (this.form.valid) {
+      const selectedActions = this.actionList.filter((_: string, i: number) => this.actionsArray.value[i]);
+      if (selectedActions.length === 0) {
+        this.actionsArray.setErrors({ required: true });
+        return;
+      }
       const permission: Permission = {
         id: this.data?.id || 0,
-        ...this.form.value
+        ...this.form.value,
+        action: selectedActions.join(',')
       };
 
       if (this.data) {

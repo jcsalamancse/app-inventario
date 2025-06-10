@@ -21,7 +21,8 @@ export class PermissionService {
           name: p.Name,
           code: p.Code,
           description: p.Description,
-          module: p.Module
+          module: p.Module,
+          action: p.Action
         }));
       })
     );
@@ -34,7 +35,8 @@ export class PermissionService {
         name: p.Name,
         code: p.Code,
         description: p.Description,
-        module: p.Module
+        module: p.Module,
+        action: p.Action
       }))
     );
   }
@@ -46,7 +48,8 @@ export class PermissionService {
         name: p.Name,
         code: p.Code,
         description: p.Description,
-        module: p.Module
+        module: p.Module,
+        action: p.Action
       }))
     );
   }
@@ -58,7 +61,8 @@ export class PermissionService {
         name: p.Name,
         code: p.Code,
         description: p.Description,
-        module: p.Module
+        module: p.Module,
+        action: p.Action
       }))
     );
   }
@@ -76,7 +80,8 @@ export class PermissionService {
           name: p.Name,
           code: p.Code,
           description: p.Description,
-          module: p.Module
+          module: p.Module,
+          action: p.Action
         }));
       })
     );
@@ -92,7 +97,8 @@ export class PermissionService {
           name: p.Name,
           code: p.Code,
           description: p.Description,
-          module: p.Module
+          module: p.Module,
+          action: p.Action
         }));
       })
     );

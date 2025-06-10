@@ -21,62 +21,65 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
     MatInputModule, MatSnackBarModule, MatProgressSpinnerModule, FormsModule
   ],
   template: `
-    <div class="p-4">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold">Permisos del Rol: {{data.roleName}}</h2>
+    <div class="relative w-full max-w-full sm:max-w-xl md:max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden">
+      <!-- Encabezado sticky -->
+      <div class="flex justify-between items-center px-6 py-4 border-b bg-gray-50 sticky top-0 z-20">
+        <h2 class="text-2xl font-bold">Permisos del Rol: {{data.roleName}}</h2>
         <button mat-icon-button (click)="close()">
           <mat-icon>close</mat-icon>
         </button>
       </div>
 
-      <div *ngIf="loading" class="flex justify-center p-4">
-        <mat-spinner diameter="40"></mat-spinner>
+      <!-- Búsqueda sticky -->
+      <div class="px-6 py-2 bg-gray-50 sticky top-16 z-10">
+        <mat-form-field class="w-full m-0">
+          <mat-label>Buscar permisos</mat-label>
+          <input matInput [(ngModel)]="search" (ngModelChange)="filterPermissions()">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
       </div>
 
-      <div *ngIf="!loading" class="space-y-4">
-        <div class="flex justify-between items-center">
-          <mat-form-field class="w-full">
-            <mat-label>Buscar permisos</mat-label>
-            <input matInput [(ngModel)]="search" (ngModelChange)="filterPermissions()">
-            <mat-icon matSuffix>search</mat-icon>
-          </mat-form-field>
-        </div>
-        <div class="max-h-96 overflow-y-auto border rounded bg-white">
-          <table class="min-w-full">
-            <thead>
-              <tr>
-                <th class="px-4 py-2">Asignado</th>
-                <th class="px-4 py-2">Nombre</th>
-                <th class="px-4 py-2">Código</th>
-                <th class="px-4 py-2">Módulo</th>
-                <th class="px-4 py-2">Descripción</th>
+      <!-- Tabla de permisos -->
+      <div class="overflow-y-auto max-h-[60vh] overflow-x-auto">
+        <table class="w-full min-w-[700px] table-auto">
+          <thead>
+            <tr class="bg-gray-100 text-gray-700 border-b">
+              <th class="px-3 py-2 w-20 text-left">Asignado</th>
+              <th class="px-3 py-2 text-left max-w-[120px]">Nombre</th>
+              <th class="px-3 py-2 text-left max-w-[120px]">Código</th>
+              <th class="px-3 py-2 text-left max-w-[100px]">Módulo</th>
+              <th class="px-3 py-2 text-left max-w-[180px]">Descripción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let group of groupedPermissions">
+              <tr class="bg-blue-50 border-b">
+                <td colspan="5" class="font-semibold px-3 py-2 text-blue-700">{{ group.module }}</td>
               </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let p of filteredPermissions">
-                <td class="px-4 py-2 text-center">
+              <tr *ngFor="let p of group.permissions; let i = index" [class.bg-gray-50]="i % 2 === 0" class="border-b">
+                <td class="px-3 py-2 text-center">
                   <input type="checkbox" [checked]="isAssigned(p.id)" (change)="togglePermission(p.id, $event)">
                 </td>
-                <td class="px-4 py-2">{{p.name}}</td>
-                <td class="px-4 py-2">{{p.code}}</td>
-                <td class="px-4 py-2">{{p.module}}</td>
-                <td class="px-4 py-2">{{p.description}}</td>
+                <td class="px-3 py-2 whitespace-normal break-words max-w-[120px]">{{p.name}}</td>
+                <td class="px-3 py-2 whitespace-normal break-words max-w-[120px]">{{p.code}}</td>
+                <td class="px-3 py-2 whitespace-normal break-words max-w-[100px]">{{p.module}}</td>
+                <td class="px-3 py-2 whitespace-normal break-words max-w-[180px]">{{p.description}}</td>
               </tr>
-            </tbody>
-          </table>
-          <div *ngIf="filteredPermissions.length === 0" class="text-center text-gray-400 py-8">
-            No hay permisos para mostrar.
-          </div>
+            </ng-container>
+          </tbody>
+        </table>
+        <div *ngIf="filteredPermissions.length === 0" class="text-center text-gray-400 py-8">
+          No hay permisos para mostrar.
         </div>
-        <div class="flex justify-end space-x-2 mt-4">
-          <button mat-button (click)="close()">Cancelar</button>
-          <button mat-raised-button color="primary" 
-                  [disabled]="!hasChanges || saving"
-                  (click)="savePermissions()">
-            <mat-spinner *ngIf="saving" diameter="20" class="mr-2"></mat-spinner>
-            Guardar Cambios
-          </button>
-        </div>
+      </div>
+
+      <!-- Barra de acciones sticky abajo -->
+      <div class="flex justify-end gap-2 px-6 py-4 border-t bg-gray-50 sticky bottom-0 z-20">
+        <button mat-button (click)="close()">Cancelar</button>
+        <button mat-raised-button color="primary" [disabled]="!hasChanges || saving" (click)="savePermissions()">
+          <mat-spinner *ngIf="saving" diameter="20" class="mr-2"></mat-spinner>
+          Guardar Cambios
+        </button>
       </div>
     </div>
   `,
@@ -98,6 +101,20 @@ export class RolePermissionsDialogComponent implements OnInit {
   hasChanges = false;
   pendingChanges: { add: number[], remove: number[] } = { add: [], remove: [] };
   private originalAssigned: number[] = [];
+
+  get groupedPermissions() {
+    const groups: { module: string, permissions: Permission[] }[] = [];
+    const map = new Map<string, Permission[]>();
+    for (const p of this.filteredPermissions) {
+      const mod = p.module || 'Sin módulo';
+      if (!map.has(mod)) map.set(mod, []);
+      map.get(mod)!.push(p);
+    }
+    for (const [module, permissions] of map.entries()) {
+      groups.push({ module, permissions });
+    }
+    return groups;
+  }
 
   constructor(
     public dialogRef: MatDialogRef<RolePermissionsDialogComponent>,

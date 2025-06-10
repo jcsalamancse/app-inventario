@@ -24,67 +24,10 @@ import { PermissionFormComponent } from '../permission-form/permission-form.comp
     MatDialogModule,
     MatSnackBarModule,
     MatProgressSpinnerModule,
-    MatFormFieldModule,
-    PermissionFormComponent
+    MatFormFieldModule
   ],
-  template: `
-    <div class="p-4">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold">Gestión de Permisos</h2>
-        <button mat-raised-button color="primary" (click)="openPermissionForm()">
-          <mat-icon>add</mat-icon>
-          Nuevo Permiso
-        </button>
-      </div>
-
-      <div class="mb-4">
-        <mat-form-field class="w-full">
-          <mat-label>Buscar permisos</mat-label>
-          <input matInput [(ngModel)]="search" (ngModelChange)="filterPermissions()">
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-      </div>
-
-      <div *ngIf="loading" class="flex justify-center p-4">
-        <mat-spinner diameter="40"></mat-spinner>
-      </div>
-
-      <div *ngIf="!loading">
-        <table class="min-w-full bg-white rounded shadow">
-          <thead>
-            <tr>
-              <th class="px-4 py-2">ID</th>
-              <th class="px-4 py-2">Nombre</th>
-              <th class="px-4 py-2">Código</th>
-              <th class="px-4 py-2">Módulo</th>
-              <th class="px-4 py-2">Descripción</th>
-              <th class="px-4 py-2">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let p of filtered">
-              <td class="px-4 py-2">{{p.id}}</td>
-              <td class="px-4 py-2">{{p.name}}</td>
-              <td class="px-4 py-2">{{p.code}}</td>
-              <td class="px-4 py-2">{{p.module}}</td>
-              <td class="px-4 py-2">{{p.description}}</td>
-              <td class="px-4 py-2 flex gap-2">
-                <button mat-icon-button color="primary" (click)="openPermissionForm(p)">
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button mat-icon-button color="warn" (click)="deletePermission(p)">
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div *ngIf="filtered.length === 0" class="text-center text-gray-400 py-8">
-          No hay permisos para mostrar.
-        </div>
-      </div>
-    </div>
-  `
+  templateUrl: './permission-list.component.html',
+  styleUrls: ['./permission-list.component.scss']
 })
 export class PermissionListComponent implements OnInit {
   permissions: Permission[] = [];

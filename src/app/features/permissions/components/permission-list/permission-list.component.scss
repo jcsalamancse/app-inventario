@@ -1,1 +1,82 @@
- 
+/* Encabezado sticky y scroll vertical */
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #f9fafb;
+}
+
+/* Alternancia de filas (ya se usa en el HTML, pero refuerzo aquí) */
+tbody tr:nth-child(even) {
+  background: #f3f4f6;
+}
+
+/* Scroll horizontal para tablas grandes */
+.overflow-x-auto {
+  overflow-x: auto;
+}
+
+/* Mejorar visualización de tooltips de Angular Material */
+.mat-tooltip {
+  font-size: 0.95rem;
+  padding: 6px 12px;
+}
+
+/* Responsividad para pantallas pequeñas */
+@media (max-width: 640px) {
+  table, thead, tbody, th, td, tr {
+    display: block;
+  }
+  thead {
+    display: none;
+  }
+  td {
+    position: relative;
+    padding-left: 50%;
+    min-height: 40px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  td:before {
+    position: absolute;
+    left: 0;
+    width: 45%;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #6b7280;
+    padding-left: 10px;
+    content: attr(data-label);
+  }
+}
+
+/* Scrollbar personalizada para la tabla */
+.overflow-x-auto::-webkit-scrollbar, .overflow-x-auto::-webkit-scrollbar-thumb {
+  height: 10px;
+  border-radius: 8px;
+}
+.overflow-x-auto::-webkit-scrollbar {
+  background: #f3f4f6;
+}
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background: #a5b4fc;
+  border-radius: 8px;
+  border: 2px solid #f3f4f6;
+}
+.overflow-x-auto:hover::-webkit-scrollbar-thumb {
+  background: #6366f1;
+}
+
+/* Firefox */
+.overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: #a5b4fc #f3f4f6;
+}
+
+/* Scrollbar vertical para max-h */
+.overflow-x-auto {
+  max-height: 65vh;
+  overflow-y: auto;
+} 
