@@ -93,6 +93,11 @@ export class PermissionFormComponent {
     private permissionService: PermissionService,
     @Inject(MAT_DIALOG_DATA) public data?: Permission
   ) {
+    // Parsear acciones seleccionadas si es edición
+    let selectedActions: string[] = [];
+    if (data?.action) {
+      selectedActions = data.action.split(',').map(a => a.trim());
+    }
     this.form = this.fb.group({
       name: [data?.name || '', Validators.required],
       code: [
@@ -106,8 +111,8 @@ export class PermissionFormComponent {
       description: [data?.description || ''],
       module: [data?.module || ''],
       actions: this.fb.array(
-        this.actionList.map((a: string) => data?.action === a ? true : false),
-        [Validators.required]
+        this.actionList.map((a: string) => selectedActions.includes(a)),
+        [atLeastOneCheckedValidator]
       )
     });
   }
@@ -154,4 +159,9 @@ export class PermissionFormComponent {
   onCancel() {
     this.dialogRef.close();
   }
+}
+
+function atLeastOneCheckedValidator(control: import('@angular/forms').AbstractControl) {
+  const formArray = control as FormArray;
+  return formArray.value.some((v: boolean) => v) ? null : { required: true };
 } 

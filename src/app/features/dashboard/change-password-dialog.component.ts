@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 
@@ -18,6 +19,7 @@ import { AuthService } from '../../services/auth.service';
     MatIconModule,
     MatFormFieldModule,
     MatInputModule,
+    MatProgressSpinnerModule,
     FormsModule,
     ReactiveFormsModule
   ],
@@ -71,6 +73,10 @@ import { AuthService } from '../../services/auth.service';
                class="text-red-400 text-sm mt-1">
             La contraseña debe tener al menos 6 caracteres
           </div>
+          <div *ngIf="passwordForm.get('newPassword')?.hasError('pattern') && passwordForm.get('newPassword')?.touched"
+               class="text-red-400 text-sm mt-1">
+            La contraseña debe contener al menos una mayúscula, una minúscula y un número
+          </div>
         </div>
 
         <div class="space-y-2">
@@ -103,7 +109,7 @@ import { AuthService } from '../../services/auth.service';
           </button>
           <button type="submit" [disabled]="passwordForm.invalid || loading"
                   class="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-400 text-white rounded-lg hover:from-blue-600 hover:to-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2">
-            <mat-icon *ngIf="loading" class="animate-spin">refresh</mat-icon>
+            <mat-spinner *ngIf="loading" diameter="20" class="mr-2"></mat-spinner>
             {{ loading ? 'Cambiando...' : 'Cambiar Contraseña' }}
           </button>
         </div>
@@ -113,6 +119,9 @@ import { AuthService } from '../../services/auth.service';
   styles: [`
     ::ng-deep .mat-mdc-dialog-container {
       --mdc-dialog-container-color: transparent;
+    }
+    ::ng-deep .mat-mdc-progress-spinner {
+      --mdc-circular-progress-active-indicator-color: white;
     }
   `]
 })
@@ -127,11 +136,16 @@ export class ChangePasswordDialogComponent {
     private dialogRef: MatDialogRef<ChangePasswordDialogComponent>,
     private dialog: MatDialog,
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    @Inject(MAT_DIALOG_DATA) public data: { usuario: any }
   ) {
     this.passwordForm = this.fb.group({
       currentPassword: ['', Validators.required],
-      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      newPassword: ['', [
+        Validators.required,
+        Validators.minLength(6),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).*$/)
+      ]],
       confirmPassword: ['', Validators.required]
     }, { validator: this.passwordMatchValidator });
   }
@@ -141,9 +155,9 @@ export class ChangePasswordDialogComponent {
       ? null : { passwordMismatch: true };
   }
 
-  showResultDialog(success: boolean) {
+  showResultDialog(success: boolean, message?: string) {
     const dialogRef = this.dialog.open(PasswordChangeResultDialog, {
-      data: { success },
+      data: { success, message },
       width: '400px',
       panelClass: 'custom-dialog-container'
     });
@@ -155,19 +169,28 @@ export class ChangePasswordDialogComponent {
   }
 
   onSubmit() {
+    if (!this.data || !this.data.usuario) {
+      console.error('No se recibió el usuario en el diálogo de cambio de contraseña');
+      this.showResultDialog(false, 'No se pudo obtener la información del usuario. Intenta recargar la página.');
+      return;
+    }
     if (this.passwordForm.valid) {
       this.loading = true;
-      this.authService.changePassword(this.passwordForm.value).subscribe({
+      const { currentPassword, newPassword } = this.passwordForm.value;
+      const { Email, UserName } = this.data.usuario;
+      this.authService.changePassword({ currentPassword, newPassword, Email, UserName }).subscribe({
         next: () => {
           this.loading = false;
-          this.showResultDialog(true);
+          this.showResultDialog(true, 'Tu contraseña ha sido actualizada exitosamente.');
         },
         error: (error) => {
           console.error('Error al cambiar la contraseña:', error);
           this.loading = false;
-          this.showResultDialog(false);
+          this.showResultDialog(false, error.error?.message || 'Error al cambiar la contraseña. Por favor, intenta nuevamente.');
         }
       });
+    } else {
+      console.log('Formulario inválido', this.passwordForm.value, this.passwordForm.errors);
     }
   }
 
@@ -192,7 +215,7 @@ export class ChangePasswordDialogComponent {
           {{ data.success ? '¡Contraseña Cambiada!' : 'Error al Cambiar Contraseña' }}
         </h2>
         <p class="text-white/70 mb-6">
-          {{ data.success ? 'Tu contraseña ha sido actualizada exitosamente.' : 'No se pudo cambiar la contraseña. Por favor, intenta nuevamente.' }}
+          {{ data.message }}
         </p>
         <button mat-button (click)="dialogRef.close()"
                 [class]="data.success ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'"
@@ -206,6 +229,6 @@ export class ChangePasswordDialogComponent {
 export class PasswordChangeResultDialog {
   constructor(
     public dialogRef: MatDialogRef<PasswordChangeResultDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: { success: boolean }
+    @Inject(MAT_DIALOG_DATA) public data: { success: boolean; message: string }
   ) {}
 } 

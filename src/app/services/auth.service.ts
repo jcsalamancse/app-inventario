@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
+import * as jwt_decode from 'jwt-decode';
+import { of, from } from 'rxjs';
 
 export interface AuthResponse {
   Token: string;
@@ -14,7 +17,13 @@ export interface AuthResponse {
 export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
-  confirmPassword: string;
+  Email: string;
+  UserName: string;
+}
+
+export interface ChangePasswordResponse {
+  success: boolean;
+  message: string;
 }
 
 export interface User {
@@ -36,11 +45,13 @@ export class AuthService {
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'user_data';
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
-  private readonly baseUrl = 'https://localhost:7044/Api'; // Cambia esto según tu entorno
+  private baseUrl = environment.apiUrl;
   private readonly loginEndpoint = '/Auth/Login';
-  private readonly changePasswordEndpoint = '/user/me/password';
+  private readonly changePasswordEndpoint = 'User/me/password';
   private readonly usersEndpoint = '/User';
   private readonly rolesEndpoint = '/roles';
+  private readonly refreshTokenEndpoint = '/api/auth/refresh-token';
+  private readonly logoutEndpoint = '/api/auth/logout';
 
   constructor(
     private http: HttpClient,
@@ -60,11 +71,20 @@ export class AuthService {
     );
   }
 
-  logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
-    this.isAuthenticatedSubject.next(false);
-    this.router.navigate(['/auth/login']);
+  logout(): Observable<void> {
+    return this.http.post<void>(this.baseUrl + this.logoutEndpoint, {})
+      .pipe(
+        map(() => {
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user_data');
+          localStorage.removeItem('token');
+          localStorage.removeItem('rememberedUser');
+          this.isAuthenticatedSubject.next(false);
+          this.router.navigate(['/login']);
+        }),
+        catchError(this.handleError)
+      );
   }
 
   getToken(): string | null {
@@ -73,17 +93,40 @@ export class AuthService {
 
   getUser(): any {
     const userStr = localStorage.getItem(this.USER_KEY);
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr || userStr === 'undefined') {
+      return null;
+    }
+    try {
+      return JSON.parse(userStr);
+    } catch {
+      return null;
+    }
   }
 
   isAuthenticated(): Observable<boolean> {
     return this.isAuthenticatedSubject.asObservable();
   }
 
-  changePassword(request: ChangePasswordRequest): Observable<any> {
-    return this.http.put(
-      this.baseUrl + this.changePasswordEndpoint,
-      request
+  getMe(): Observable<any> {
+    return this.http.get<any>(this.baseUrl + '/User/me');
+  }
+
+  changePassword(request: ChangePasswordRequest): Observable<ChangePasswordResponse> {
+    const body = {
+      Email: request.Email,
+      UserName: request.UserName,
+      CurrentPassword: request.currentPassword,
+      NewPassword: request.newPassword
+    };
+    return this.http.put<ChangePasswordResponse>(
+      this.baseUrl + '/' + this.changePasswordEndpoint,
+      body
+    ).pipe(
+      map(() => ({
+        success: true,
+        message: 'Contraseña cambiada exitosamente'
+      })),
+      catchError(this.handleError)
     );
   }
 
@@ -132,5 +175,44 @@ export class AuthService {
       return !!this.getToken();
     }
     return false;
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    let errorMessage = 'Error al cambiar la contraseña';
+    
+    if (error.error instanceof ErrorEvent) {
+      // Error del cliente
+      errorMessage = error.error.message;
+    } else {
+      // Error del servidor
+      errorMessage = error.error?.message || errorMessage;
+    }
+    
+    return throwError(() => ({
+      success: false,
+      message: errorMessage
+    }));
+  }
+
+  refreshToken(): Observable<string> {
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    return this.http.post<{ token: string }>(this.baseUrl + this.refreshTokenEndpoint, { refreshToken })
+      .pipe(
+        map(response => {
+          localStorage.setItem('token', response.token);
+          return response.token;
+        }),
+        catchError(error => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('tokenExpiration');
+          this.isAuthenticatedSubject.next(false);
+          return throwError(() => error);
+        })
+      );
   }
 } 

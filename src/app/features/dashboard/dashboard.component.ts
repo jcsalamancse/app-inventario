@@ -16,6 +16,7 @@ import { ViewContainerRef } from '@angular/core';
 import { UserMenuOverlayComponent } from './user-menu-overlay.component';
 import { NotificationsOverlayComponent } from './notifications-overlay.component';
 import { ChangePasswordDialogComponent } from './change-password-dialog.component';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -69,7 +70,8 @@ export class DashboardComponent {
     public router: Router,
     private http: HttpClient,
     private overlay: Overlay,
-    private vcr: ViewContainerRef
+    private vcr: ViewContainerRef,
+    private authService: AuthService
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
     let token = '';
@@ -167,16 +169,13 @@ export class DashboardComponent {
   }
 
   onChangePassword() {
-    const dialogRef = this.dialog.open(ChangePasswordDialogComponent, {
-      width: '400px',
-      panelClass: 'custom-dialog-container',
-      autoFocus: true,
-      disableClose: true
-    });
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // Lógica después de cambiar la contraseña
-      }
+    this.authService.getMe().subscribe(usuario => {
+      console.log('Usuario autenticado recibido para cambio de contraseña:', usuario);
+      this.dialog.open(ChangePasswordDialogComponent, {
+        data: { usuario }
+      });
+    }, error => {
+      alert('No se pudo obtener la información del usuario. Intenta recargar la página.');
     });
   }
 
