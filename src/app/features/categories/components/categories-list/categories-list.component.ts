@@ -18,6 +18,7 @@ import { RouterModule } from '@angular/router';
 import { CategoryService, Category } from '../../services/category.service';
 import { MatDialog } from '@angular/material/dialog';
 import { CategoryFormComponent } from '../category-form/category-form.component';
+import { BehaviorSubject, catchError, finalize, of } from 'rxjs';
 
 @Component({
   selector: 'app-categories-list',
@@ -127,6 +128,9 @@ import { CategoryFormComponent } from '../category-form/category-form.component'
 })
 export class CategoriesListComponent implements OnInit {
   displayedColumns: string[] = ['id', 'name', 'description', 'isActive', 'actions'];
+  categories$ = new BehaviorSubject<Category[]>([]);
+  loading = false;
+  error: string | null = null;
   dataSource: any;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -142,22 +146,33 @@ export class CategoriesListComponent implements OnInit {
   }
 
   loadCategories(): void {
-    this.categoryService.getCategories().subscribe({
-      next: (categories) => {
-        this.dataSource = categories;
+    this.loading = true;
+    this.error = null;
+    this.categoryService.getCategories().pipe(
+      catchError(err => {
+        this.error = 'Error al cargar categorías';
+        return of([]);
+      }),
+      finalize(() => this.loading = false)
+    ).subscribe(categories => {
+      this.categories$.next(categories);
+      this.dataSource = categories;
+      if (this.dataSource.paginator) {
         this.dataSource.paginator = this.paginator;
+      }
+      if (this.dataSource.sort) {
         this.dataSource.sort = this.sort;
-      },
-      error: (error) => console.error('Error al cargar categorías', error)
+      }
     });
   }
 
   applyFilter(event: Event): void {
     const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+    if (this.dataSource && this.dataSource.filter !== undefined) {
+      this.dataSource.filter = filterValue.trim().toLowerCase();
+      if (this.dataSource.paginator) {
+        this.dataSource.paginator.firstPage();
+      }
     }
   }
 
@@ -180,11 +195,16 @@ export class CategoriesListComponent implements OnInit {
 
   deleteCategory(category: Category): void {
     if (confirm('¿Está seguro de eliminar esta categoría?')) {
-      this.categoryService.deleteCategory(category.id).subscribe({
+      this.loading = true;
+      this.categoryService.deleteCategory(category.id).pipe(
+        finalize(() => this.loading = false)
+      ).subscribe({
         next: () => {
           this.loadCategories();
         },
-        error: (error) => console.error('Error al eliminar categoría', error)
+        error: () => {
+          this.error = 'Error al eliminar categoría';
+        }
       });
     }
   }

@@ -98,10 +98,14 @@ export class DashboardComponent {
   cargarMovimientos(token: string) {
     this.loadingMovimientos = true;
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    this.http.get<any[]>('https://localhost:7044/Api/Inventory/Movements', { headers })
+    this.http.get<any[]>('https://localhost:7044/api/Movement', { headers })
       .subscribe({
-        next: (data) => {
-          this.movimientos = data;
+        next: (data: any) => {
+          if (Array.isArray(data)) {
+            this.movimientos = data;
+          } else {
+            this.movimientos = data?.Movements?.$values || [];
+          }
           this.loadingMovimientos = false;
           this.actualizarGrafica();
         },

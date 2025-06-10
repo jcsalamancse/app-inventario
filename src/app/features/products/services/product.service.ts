@@ -60,7 +60,7 @@ export class ProductService {
   }
 
   getProductMovements(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}/movements`);
+    return this.http.get(`${environment.apiUrl}/Movement/product/${id}`);
   }
 
   getStockAlerts(): Observable<any> {

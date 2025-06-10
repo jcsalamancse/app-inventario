@@ -2,26 +2,34 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { map } from 'rxjs/operators';
 
 export interface Category {
   id: number;
   name: string;
   description?: string;
   isActive: boolean;
-  createdAt: string;
-  updatedAt?: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class CategoryService {
-  private apiUrl = `${environment.apiUrl}/categories`;
+  private apiUrl = `${environment.apiUrl}/Category`;
 
   constructor(private http: HttpClient) {}
 
   getCategories(): Observable<Category[]> {
-    return this.http.get<Category[]>(this.apiUrl);
+    return this.http.get<any>(this.apiUrl).pipe(
+      map(response => {
+        return (response?.$values || []).map((cat: any) => ({
+          id: cat.Id,
+          name: cat.Name,
+          description: cat.Description,
+          isActive: cat.IsActive
+        }));
+      })
+    );
   }
 
   getCategoryById(id: number): Observable<Category> {
@@ -29,18 +37,25 @@ export class CategoryService {
   }
 
   createCategory(category: Partial<Category>): Observable<Category> {
-    return this.http.post<Category>(this.apiUrl, category);
+    const payload = {
+      Name: category.name,
+      Description: category.description,
+      IsActive: category.isActive
+    };
+    return this.http.post<Category>(this.apiUrl, payload);
   }
 
   updateCategory(id: number, category: Partial<Category>): Observable<Category> {
-    return this.http.put<Category>(`${this.apiUrl}/${id}`, category);
+    const payload = {
+      Id: id,
+      Name: category.name ?? '',
+      Description: category.description ?? '',
+      IsActive: category.isActive ?? false
+    };
+    return this.http.put<Category>(`${this.apiUrl}/${id}`, payload);
   }
 
   deleteCategory(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  updateCategoryStatus(id: number, isActive: boolean): Observable<Category> {
-    return this.http.patch<Category>(`${this.apiUrl}/${id}/status`, { isActive });
   }
 } 
