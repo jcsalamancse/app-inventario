@@ -6,5 +6,17 @@ export const CATEGORIES_ROUTES: Routes = [
     loadComponent: () => import('./components/categories-list/categories-list.component')
       .then(m => m.CategoriesListComponent),
     title: 'Categorías'
+  },
+  {
+    path: 'nueva',
+    loadComponent: () => import('./components/category-form/category-form.component')
+      .then(m => m.CategoryFormComponent),
+    title: 'Nueva Categoría'
+  },
+  {
+    path: 'editar/:id',
+    loadComponent: () => import('./components/category-form/category-form.component')
+      .then(m => m.CategoryFormComponent),
+    title: 'Editar Categoría'
   }
 ]; 

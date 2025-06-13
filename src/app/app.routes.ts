@@ -3,6 +3,7 @@ import { LoginComponent } from './features/auth/login/login.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { USERS_ROUTES } from './features/users/users.routes';
 import { CATEGORIES_ROUTES } from './features/categories/categories.routes';
+import { NotFoundComponent } from './features/dashboard/components/not-found.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -33,8 +34,14 @@ export const routes: Routes = [
       {
         path: 'movimientos',
         loadComponent: () => import('./features/movements/components/movement-list.component').then(m => m.MovementListComponent)
+      },
+      {
+        path: '',
+        redirectTo: 'categories',
+        pathMatch: 'full'
       }
     ]
   },
-  { path: '', redirectTo: '/login', pathMatch: 'full' }
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '**', component: NotFoundComponent }
 ];
