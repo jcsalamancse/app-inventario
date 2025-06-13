@@ -4,11 +4,12 @@ import { MovementService } from '../services/movement.service';
 import { Movement } from '../models/movement.model';
 import { Observable } from 'rxjs';
 import { Router } from '@angular/router';
+import { MovementFormComponent } from './movement-form.component';
 
 @Component({
   selector: 'app-movement-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MovementFormComponent],
   template: `
     <div class="p-4">
       <div class="flex items-center justify-between mb-4">
@@ -74,6 +75,8 @@ import { Router } from '@angular/router';
           </div>
         </div>
       </div>
+
+      <app-movement-form *ngIf="showForm" (saved)="onFormSaved()" (cancelled)="onFormCancelled()" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50" />
     </div>
   `,
   styles: [`
@@ -96,6 +99,7 @@ export class MovementListComponent implements OnInit {
   error: string | null = null;
   showDeleteConfirm = false;
   movementToDelete: Movement | null = null;
+  showForm = false;
 
   constructor(private movementService: MovementService, private router: Router) {}
 
@@ -154,7 +158,15 @@ export class MovementListComponent implements OnInit {
   }
 
   onAdd() {
-    // Aquí irá la lógica para abrir el formulario de nuevo movimiento
-    alert('Funcionalidad para agregar nuevo movimiento próximamente.');
+    this.showForm = true;
+  }
+
+  onFormSaved() {
+    this.showForm = false;
+    this.fetchMovements();
+  }
+
+  onFormCancelled() {
+    this.showForm = false;
   }
 } 

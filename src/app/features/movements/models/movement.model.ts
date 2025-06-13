@@ -24,11 +24,18 @@ export interface MovementItem {
   notes?: string;
 }
 
+export enum MovementType {
+  Entry = 'ENTRY',
+  Exit = 'EXIT',
+  Transfer = 'TRANSFER'
+}
+
 export interface MovementFormData {
   type: string;
-  reference?: string;
-  sourceLocation?: string;
-  destinationLocation?: string;
-  items: MovementItem[];
+  reference: string;
+  productId: number;
+  quantity: number;
+  sourceLocationId: number;
+  destinationLocationId: number;
   notes?: string;
 } 

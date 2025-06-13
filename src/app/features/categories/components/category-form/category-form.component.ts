@@ -1,105 +1,115 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { CategoryService, Category } from '../../services/category.service';
+import { Category } from '../../services/category.service';
+import { CommonModule } from '@angular/common';
+import { ModalComponent } from '../../../../shared/components/modal/modal.component';
 
 @Component({
   selector: 'app-category-form',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatCheckboxModule
-  ],
+  imports: [CommonModule, ReactiveFormsModule, ModalComponent],
   template: `
-    <div class="p-6">
-      <h2 class="text-xl font-bold mb-4">{{data ? 'Editar' : 'Nueva'}} Categoría</h2>
+    <app-modal 
+      [isOpen]="true" 
+      [title]="category ? 'Editar Categoría' : 'Nueva Categoría'"
+      (close)="cancel.emit()">
       
-      <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()">
-        <mat-form-field class="w-full mb-4">
-          <mat-label>Nombre</mat-label>
-          <input matInput formControlName="name" placeholder="Ingrese el nombre de la categoría">
-          <mat-error *ngIf="categoryForm.get('name')?.hasError('required')">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+        <!-- Nombre -->
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700">Nombre</label>
+          <input 
+            type="text" 
+            id="name"
+            formControlName="name" 
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            [class.border-red-300]="form.get('name')?.invalid && form.get('name')?.touched"
+            placeholder="Ingrese el nombre de la categoría" />
+          <div *ngIf="form.get('name')?.invalid && form.get('name')?.touched" 
+               class="mt-1 text-sm text-red-600">
             El nombre es requerido
-          </mat-error>
-        </mat-form-field>
+          </div>
+        </div>
 
-        <mat-form-field class="w-full mb-4">
-          <mat-label>Descripción</mat-label>
-          <textarea matInput formControlName="description" rows="3" 
-                    placeholder="Ingrese la descripción de la categoría"></textarea>
-        </mat-form-field>
+        <!-- Descripción -->
+        <div>
+          <label for="description" class="block text-sm font-medium text-gray-700">Descripción</label>
+          <textarea 
+            id="description"
+            formControlName="description" 
+            rows="3"
+            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            placeholder="Ingrese una descripción (opcional)"></textarea>
+        </div>
 
-        <mat-checkbox formControlName="isActive" class="mb-4">
-          Categoría Activa
-        </mat-checkbox>
-
-        <div class="flex justify-end gap-2">
-          <button mat-button type="button" (click)="onCancel()">Cancelar</button>
-          <button mat-raised-button color="primary" type="submit" 
-                  [disabled]="categoryForm.invalid">
-            {{data ? 'Actualizar' : 'Crear'}}
-          </button>
+        <!-- Estado -->
+        <div class="flex items-center">
+          <input 
+            type="checkbox" 
+            id="isActive"
+            formControlName="isActive" 
+            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+          <label for="isActive" class="ml-2 block text-sm text-gray-700">
+            Categoría activa
+          </label>
         </div>
       </form>
-    </div>
-  `,
-  styles: [`
-    :host {
-      display: block;
-    }
-  `]
+
+      <div modalFooter class="flex justify-end gap-3">
+        <button 
+          type="button"
+          (click)="cancel.emit()"
+          class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+          Cancelar
+        </button>
+        <button 
+          type="button"
+          (click)="onSubmit()"
+          [disabled]="form.invalid || loading"
+          class="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          <span *ngIf="loading" class="mr-2">
+            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </span>
+          {{ category ? 'Actualizar' : 'Crear' }}
+        </button>
+      </div>
+    </app-modal>
+  `
 })
 export class CategoryFormComponent implements OnInit {
-  categoryForm: FormGroup;
+  @Input() category: Category | null = null;
+  @Input() loading = false;
+  @Output() save = new EventEmitter<Partial<Category>>();
+  @Output() cancel = new EventEmitter<void>();
 
-  constructor(
-    private fb: FormBuilder,
-    private categoryService: CategoryService,
-    public dialogRef: MatDialogRef<CategoryFormComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: Category
-  ) {
-    this.categoryForm = this.fb.group({
-      name: ['', Validators.required],
+  form: FormGroup;
+
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(3)]],
       description: [''],
       isActive: [true]
     });
   }
 
-  ngOnInit(): void {
-    if (this.data) {
-      this.categoryForm.patchValue(this.data);
+  ngOnInit() {
+    if (this.category) {
+      this.form.patchValue(this.category);
     }
   }
 
-  onSubmit(): void {
-    if (this.categoryForm.valid) {
-      const categoryData = this.categoryForm.value;
-      
-      if (this.data) {
-        this.categoryService.updateCategory(this.data.id, categoryData).subscribe({
-          next: () => this.dialogRef.close(true),
-          error: (error) => console.error('Error al actualizar categoría', error)
-        });
-      } else {
-        this.categoryService.createCategory(categoryData).subscribe({
-          next: () => this.dialogRef.close(true),
-          error: (error) => console.error('Error al crear categoría', error)
-        });
-      }
+  onSubmit() {
+    if (this.form.valid) {
+      this.save.emit(this.form.value);
+    } else {
+      // Marcar todos los campos como touched para mostrar errores
+      Object.keys(this.form.controls).forEach(key => {
+        const control = this.form.get(key);
+        control?.markAsTouched();
+      });
     }
-  }
-
-  onCancel(): void {
-    this.dialogRef.close();
   }
 } 

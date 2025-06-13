@@ -32,14 +32,6 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   width: 100%;
 }
 
-.mat-mdc-input-element {
-  color: #333 !important;
-}
-
-.mat-mdc-form-field-label {
-  color: rgba(0, 0, 0, 0.6) !important;
-}
-
 /* Asegurar que el diálogo tenga el fondo correcto */
 .cdk-overlay-pane {
   .mat-mdc-dialog-container {

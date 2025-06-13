@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, tap, throwError } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
-import * as jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { of, from } from 'rxjs';
 
 export interface AuthResponse {
