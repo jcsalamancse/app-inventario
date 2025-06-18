@@ -17,7 +17,10 @@ import { MovementFormData, MovementType } from '../models/movement.model';
           <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
           <select formControlName="type" class="w-full border rounded-lg px-3 py-2">
             <option value="">Selecciona un tipo</option>
-            <option *ngFor="let type of movementTypes" [value]="type">{{ type }}</option>
+            <option value="0">Entrada</option>
+            <option value="1">Salida</option>
+            <option value="2">Ajuste</option>
+            <option value="3">Transferencia</option>
           </select>
           <div *ngIf="form.get('type')?.invalid && form.get('type')?.touched" class="text-red-500 text-xs mt-1">El tipo es obligatorio.</div>
         </div>
@@ -28,10 +31,17 @@ import { MovementFormData, MovementType } from '../models/movement.model';
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Producto</label>
-          <select formControlName="productId" class="w-full border rounded-lg px-3 py-2">
-            <option value="">Selecciona un producto</option>
-            <option *ngFor="let p of productos" [value]="p.id">{{ p.name }}</option>
-          </select>
+          <div class="max-h-40 overflow-y-auto border border-gray-200 rounded-md">
+            <select
+              id="ProductId"
+              formControlName="productId"
+              size="5"
+              class="block w-full bg-white border-0 focus:ring-0 text-sm">
+              <option *ngFor="let p of productos" [value]="p.id">
+                {{ p.name }}
+              </option>
+            </select>
+          </div>
           <div *ngIf="form.get('productId')?.invalid && form.get('productId')?.touched" class="text-red-500 text-xs mt-1">El producto es obligatorio.</div>
         </div>
         <div>
@@ -51,6 +61,10 @@ import { MovementFormData, MovementType } from '../models/movement.model';
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación Destino</label>
           <input type="number" formControlName="destinationLocationId" class="w-full border rounded-lg px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Ubicación</label>
+          <input type="number" formControlName="locationId" class="w-full border rounded-lg px-3 py-2" />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Notas</label>
@@ -80,13 +94,14 @@ export class MovementFormComponent implements OnInit {
     private productService: ProductService
   ) {
     this.form = this.fb.group({
-      type: ['', Validators.required],
+      type: [0, Validators.required],
       reference: ['', Validators.required],
       productId: ['', Validators.required],
       quantity: ['', [Validators.required, Validators.min(1)]],
       price: ['', [Validators.required, Validators.min(0)]],
-      sourceLocationId: [''],
-      destinationLocationId: [''],
+      sourceLocationId: [0],
+      destinationLocationId: [0],
+      locationId: [0, Validators.required],
       notes: ['']
     });
   }
@@ -109,18 +124,18 @@ export class MovementFormComponent implements OnInit {
 
     const formValue = this.form.value;
     const movementDto = {
-      type: this.capitalizeType(formValue.type),
-      reference: formValue.reference,
-      productId: Number(formValue.productId),
-      quantity: Number(formValue.quantity),
-      sourceLocationId: Number(formValue.sourceLocationId),
-      destinationLocationId: Number(formValue.destinationLocationId),
-      notes: formValue.notes || ''
+      Type: Number(formValue.type),
+      Reference: formValue.reference,
+      ProductId: Number(formValue.productId),
+      Quantity: Number(formValue.quantity),
+      SourceLocationId: Number(formValue.sourceLocationId),
+      DestinationLocationId: Number(formValue.destinationLocationId),
+      LocationId: Number(formValue.locationId),
+      Notes: formValue.notes || ''
     };
 
-    this.movementService.createMovement({ movementDto }).subscribe({
+    this.movementService.createMovement(movementDto).subscribe({
       next: () => {
-        this.loading = false;
         this.saved.emit();
       },
       error: (err) => {

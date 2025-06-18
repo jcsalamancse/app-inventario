@@ -12,6 +12,7 @@ import { authReducer } from './store/reducers/auth.reducer';
 import { AuthEffects } from './store/effects/auth.effects';
 import { ChangePasswordDialogComponent } from './features/dashboard/change-password-dialog.component';
 import { authInterceptor } from './services/auth.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,7 +22,8 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withFetch(),
       withInterceptors([
-        authInterceptor
+        authInterceptor,
+        errorInterceptor
       ])
     ),
     provideStore({ auth: authReducer }),

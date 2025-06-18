@@ -12,6 +12,8 @@ export interface Movement {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  productName?: string;
+  quantity?: number;
 }
 
 export interface MovementItem {
@@ -31,11 +33,11 @@ export enum MovementType {
 }
 
 export interface MovementFormData {
-  type: string;
-  reference: string;
-  productId: number;
-  quantity: number;
-  sourceLocationId: number;
-  destinationLocationId: number;
-  notes?: string;
+  Type: number;
+  Reference: string;
+  ProductId: number;
+  Quantity: number;
+  SourceLocationId: number;
+  DestinationLocationId: number;
+  Notes: string;
 } 

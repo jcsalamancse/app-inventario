@@ -12,7 +12,19 @@ export class MovementService {
   constructor(private http: HttpClient) {}
 
   getAll(): Observable<Movement[]> {
-    return this.http.get<Movement[]>(this.apiUrl).pipe(
+    return this.http.get<any>(this.apiUrl).pipe(
+      map(res => (res?.Movements?.$values || []).map((m: any) => ({
+        id: m.Id,
+        type: m.Type,
+        reference: m.Reference,
+        date: m.Date,
+        status: m.Status,
+        productName: m.ProductName,
+        quantity: m.Quantity,
+        total: m.Total,
+        notes: m.Notes,
+        createdAt: m.CreatedAt
+      }))),
       catchError(this.handleError)
     );
   }
@@ -47,8 +59,8 @@ export class MovementService {
     );
   }
 
-  createMovement(payload: { movementDto: MovementFormData }) {
-    return this.http.post(this.apiUrl, payload);
+  createMovement(movementDto: MovementFormData) {
+    return this.http.post<Movement>(this.apiUrl, movementDto);
   }
 
   private handleError(error: any) {
