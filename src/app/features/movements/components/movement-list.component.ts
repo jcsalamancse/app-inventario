@@ -118,8 +118,8 @@ import { ConfirmDialogComponent } from '../../../shared/components';
       <!-- Modal de Formulario -->
       <ng-container *ngIf="showForm">
         <app-movement-form
-          *ngIf="showForm"
-          (saved)="closeForm()"
+          [movementToEdit]="editingMovement"
+          (saved)="onFormSaved()"
           (cancelled)="closeForm()">
         </app-movement-form>
       </ng-container>
@@ -184,13 +184,18 @@ export class MovementListComponent implements OnInit {
   }
 
   openForm(movement?: Movement) {
-    this.editingMovement = movement ?? null;
+    this.editingMovement = movement ? { ...movement } : null;
     this.showForm = true;
   }
 
   closeForm() {
     this.showForm = false;
     this.editingMovement = null;
+  }
+
+  onFormSaved() {
+    this.closeForm();
+    this.loadMovements();
   }
 
   onSaveMovement(data: MovementFormData) {

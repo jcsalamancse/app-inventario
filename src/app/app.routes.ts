@@ -59,8 +59,7 @@ export const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: 'categories',
-        pathMatch: 'full'
+        loadComponent: () => import('./features/dashboard/components/dashboard-home.component').then(m => m.DashboardHomeComponent)
       }
     ]
   },

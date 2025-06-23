@@ -1,9 +1,9 @@
-import { Component, EventEmitter, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MovementService } from '../services/movement.service';
 import { ProductService } from '../../products/services/product.service';
-import { MovementFormData, MovementType } from '../models/movement.model';
+import { Movement, MovementFormData, MovementType } from '../models/movement.model';
 
 @Component({
   selector: 'app-movement-form',
@@ -79,10 +79,13 @@ import { MovementFormData, MovementType } from '../models/movement.model';
     </div>
   `
 })
-export class MovementFormComponent implements OnInit {
+export class MovementFormComponent implements OnInit, OnChanges {
+  @Input() movementToEdit: Movement | null = null;
   @Output() saved = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
+
   form: FormGroup;
+  isEditMode = false;
   loading = false;
   error: string | null = null;
   productos: { id: number, name: string }[] = [];
@@ -107,35 +110,69 @@ export class MovementFormComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.loadProducts();
+    this.movementTypes = Object.values(MovementType);
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['movementToEdit'] && this.movementToEdit) {
+      this.isEditMode = true;
+      this.form.patchValue(this.movementToEdit);
+       // The API might send back a different structure, so we need to map it correctly.
+      // Assuming 'productName' comes in the movement object and we need to find the 'productId'
+      const product = this.productos.find(p => p.name === this.movementToEdit?.productName);
+      if (product) {
+        this.form.patchValue({ productId: product.id });
+      }
+    } else {
+      this.isEditMode = false;
+      this.form.reset({ type: 0, sourceLocationId: 0, destinationLocationId: 0, locationId: 0 });
+    }
+  }
+
+  loadProducts() {
     this.productService.getProducts({ page: 1, pageSize: 100 }).subscribe(data => {
       this.productos = (data.Items?.$values || []).map((p: any) => ({
         id: p.Id,
         name: p.Name
       }));
+       // If we are in edit mode when products load, try to set the product value again
+      if (this.isEditMode && this.movementToEdit) {
+        const product = this.productos.find(p => p.name === this.movementToEdit?.productName);
+        if (product) {
+          this.form.patchValue({ productId: product.id });
+        }
+      }
     });
-
-    this.movementTypes = Object.values(MovementType);
   }
+  
 
   onSubmit() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     this.loading = true;
     this.error = null;
 
     const formValue = this.form.value;
-    const movementDto = {
+    const movementDto: MovementFormData = {
       Type: Number(formValue.type),
       Reference: formValue.reference,
       ProductId: Number(formValue.productId),
       Quantity: Number(formValue.quantity),
       SourceLocationId: Number(formValue.sourceLocationId),
       DestinationLocationId: Number(formValue.destinationLocationId),
-      LocationId: Number(formValue.locationId),
-      Notes: formValue.notes || ''
+      Notes: formValue.notes || '',
     };
 
-    this.movementService.createMovement(movementDto).subscribe({
+    const action$ = this.isEditMode && this.movementToEdit
+      ? this.movementService.update(this.movementToEdit.id, movementDto)
+      : this.movementService.create(movementDto);
+
+    action$.subscribe({
       next: () => {
+        this.loading = false;
         this.saved.emit();
       },
       error: (err) => {

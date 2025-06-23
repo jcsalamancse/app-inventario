@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { Router, RouterModule } from '@angular/router';
 import { inject } from '@angular/core';
-import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NgChartsModule } from 'ng2-charts';
 import { ChartConfiguration, ChartType } from 'chart.js';
@@ -17,6 +17,8 @@ import { UserMenuOverlayComponent } from './user-menu-overlay.component';
 import { NotificationsOverlayComponent } from './notifications-overlay.component';
 import { ChangePasswordDialogComponent } from './change-password-dialog.component';
 import { AuthService } from '../../services/auth.service';
+import { DashboardService } from './services/dashboard.service';
+import { KpiWidgetComponent } from './components/kpi-widget.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,7 +31,8 @@ import { AuthService } from '../../services/auth.service';
     HttpClientModule, 
     MatProgressSpinnerModule, 
     NgChartsModule,
-    RouterModule
+    RouterModule,
+    KpiWidgetComponent
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']
@@ -39,12 +42,15 @@ export class DashboardComponent {
   email: string | null = null;
   now: Date = new Date();
   private dialog = inject(MatDialog);
-  movimientos: any[] = [];
+  movimientos$: any;
   loadingMovimientos = false;
   private overlayRef: OverlayRef | null = null;
   isNotificationsOpen = false;
   private notificationsOverlayRef: OverlayRef | null = null;
   isBrowser = false;
+  productosKpi$: any;
+  movimientosKpi$: any;
+  usuariosKpi$: any;
 
   // Gráfica de movimientos por mes
   barChartData: ChartConfiguration<'bar'>['data'] = {
@@ -68,10 +74,10 @@ export class DashboardComponent {
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     public router: Router,
-    private http: HttpClient,
     private overlay: Overlay,
     private vcr: ViewContainerRef,
-    private authService: AuthService
+    private authService: AuthService,
+    private dashboardService: DashboardService
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
     let token = '';
@@ -82,8 +88,11 @@ export class DashboardComponent {
       const payload = this.decodeJWT(token);
       this.username = payload?.username || payload?.userName || null;
       this.email = payload?.email || null;
-      this.cargarMovimientos(token);
     }
+    this.movimientos$ = this.dashboardService.getRecentMovements();
+    this.productosKpi$ = this.dashboardService.getTopProducts();
+    this.movimientosKpi$ = this.dashboardService.getRecentMovements();
+    this.usuariosKpi$ = this.dashboardService.getTopSuppliers();
   }
 
   decodeJWT(token: string): any {
@@ -93,36 +102,6 @@ export class DashboardComponent {
     } catch {
       return null;
     }
-  }
-
-  cargarMovimientos(token: string) {
-    this.loadingMovimientos = true;
-    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    this.http.get<any[]>('https://localhost:7044/api/Movement', { headers })
-      .subscribe({
-        next: (data: any) => {
-          if (Array.isArray(data)) {
-            this.movimientos = data;
-          } else {
-            this.movimientos = data?.Movements?.$values || [];
-          }
-          this.loadingMovimientos = false;
-          this.actualizarGrafica();
-        },
-        error: () => { this.movimientos = []; this.loadingMovimientos = false; }
-      });
-  }
-
-  actualizarGrafica() {
-    // Agrupar movimientos por mes
-    const meses: { [key: string]: number } = {};
-    for (const mov of this.movimientos) {
-      const fecha = new Date(mov.fecha || mov.date || mov.createdAt);
-      const mes = fecha.toLocaleString('default', { month: 'short', year: '2-digit' });
-      meses[mes] = (meses[mes] || 0) + 1;
-    }
-    this.barChartData.labels = Object.keys(meses);
-    this.barChartData.datasets[0].data = Object.values(meses);
   }
 
   onLogout() {
@@ -211,6 +190,22 @@ export class DashboardComponent {
   closeNotifications() {
     this.isNotificationsOpen = false;
     this.notificationsOverlayRef?.dispose();
+  }
+
+  getKpiValue(data: any): number {
+    if (!data) return 0;
+    if (Array.isArray(data)) return data.length;
+    if (typeof data.total === 'number') return data.total;
+    if (typeof data.count === 'number') return data.count;
+    if (Array.isArray(data.$values)) return data.$values.length;
+    return 0;
+  }
+
+  getMovimientosArray(data: any): any[] {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.$values)) return data.$values;
+    return [];
   }
 }
 
