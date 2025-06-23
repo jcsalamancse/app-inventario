@@ -28,6 +28,8 @@ import { CategoryService } from '../../../categories/services/category.service';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { DashboardService } from '../../../dashboard/services/dashboard.service';
+import { getDotNetArray } from '../../../../shared/utils/dotnet-helpers';
 
 @Component({
   selector: 'app-products-list',
@@ -294,7 +296,8 @@ export class ProductsListComponent implements OnInit {
     private productService: ProductService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private categoryService: CategoryService
+    private categoryService: CategoryService,
+    private dashboardService: DashboardService
   ) {}
 
   ngOnInit() {
@@ -354,19 +357,17 @@ export class ProductsListComponent implements OnInit {
   }
 
   loadStatistics() {
-    // Cargar productos con stock bajo
-    this.productService.getLowStockProducts().pipe(
+    // Cargar alertas de stock desde el dashboard
+    this.dashboardService.getStockAlerts().pipe(
       catchError(error => {
-        console.error('Error al cargar productos con stock bajo:', error);
-        return of({ $values: [] });
+        console.error('Error al cargar alertas de stock:', error);
+        return of([]);
       })
     ).subscribe({
       next: (response) => {
-        if (response && response.$values) {
-          this.lowStockCount = response.$values.length;
-        } else {
-          this.lowStockCount = 0;
-        }
+        // Contar solo las alertas de bajo stock (LowStock)
+        const alerts = getDotNetArray(response);
+        this.lowStockCount = alerts.filter((alert: any) => alert.AlertType === 'LowStock').length;
       }
     });
 
