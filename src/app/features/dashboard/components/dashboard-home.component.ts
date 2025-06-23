@@ -105,17 +105,10 @@ import { ChartConfiguration, ChartOptions } from 'chart.js';
                   </td>
                 </tr>
                 <tr *ngFor="let movimiento of getMovimientosArray(movimientos)" class="text-white/80 border-b border-white/5 hover:bg-white/5 transition-colors">
-                  <td class="py-3">{{ movimiento.producto ?? movimiento.name ?? movimiento.ProductName }}</td>
-                  <td class="py-3">
-                    <span [ngClass]="{
-                      'bg-green-500/20 text-green-400': movimiento.tipo === 'Entrada' || movimiento.type === 'Entrada',
-                      'bg-red-500/20 text-red-400': movimiento.tipo === 'Salida' || movimiento.type === 'Salida'
-                    }" class="px-2 py-1 rounded-full text-xs font-medium">
-                      {{ movimiento.tipo ?? movimiento.type }}
-                    </span>
-                  </td>
-                  <td class="py-3">{{ movimiento.cantidad ?? movimiento.quantity }}</td>
-                  <td class="py-3 text-sm">{{ (movimiento.fecha ?? movimiento.date ?? movimiento.createdAt) | date:'short' }}</td>
+                  <td class="py-3">{{ movimiento.ProductName }}</td>
+                  <td class="py-3">{{ movimiento.Type }}</td>
+                  <td class="py-3">{{ movimiento.Quantity }}</td>
+                  <td class="py-3 text-sm">{{ movimiento.Date | date:'short' }}</td>
                 </tr>
               </ng-container>
               <ng-template #loadingOrEmpty>
@@ -184,14 +177,31 @@ export class DashboardHomeComponent {
     this.movimientos$.pipe(
       map(movs => this.getMovimientosArray(movs))
     ).subscribe(movimientos => {
-      const meses: { [key: string]: number } = {};
-      for (const mov of movimientos) {
-        const fecha = new Date(mov.fecha || mov.date || mov.createdAt);
+      // Generar los 12 meses del año actual
+      const mesesLabels: string[] = [];
+      const mesesData: number[] = [];
+      const now = new Date();
+      const year = now.getFullYear();
+
+      // Inicializar todos los meses en 0
+      for (let i = 0; i < 12; i++) {
+        const fecha = new Date(year, i, 1);
         const mes = fecha.toLocaleString('default', { month: 'short', year: '2-digit' });
-        meses[mes] = (meses[mes] || 0) + 1;
+        mesesLabels.push(mes);
+        mesesData.push(0);
       }
-      this.barChartData.labels = Object.keys(meses);
-      this.barChartData.datasets[0].data = Object.values(meses);
+
+      // Agrupar movimientos por mes real
+      for (const mov of movimientos) {
+        const fecha = new Date(mov.Date || mov.fecha || mov.date || mov.createdAt);
+        if (fecha.getFullYear() === year) {
+          const mesIndex = fecha.getMonth();
+          mesesData[mesIndex]++;
+        }
+      }
+
+      this.barChartData.labels = mesesLabels;
+      this.barChartData.datasets[0].data = mesesData;
     });
   }
 
