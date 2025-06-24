@@ -128,12 +128,16 @@ import { ConfirmDialogComponent } from '../../../shared/components';
       <ng-container *ngIf="showDeleteModal">
         <app-confirm-dialog
           [isOpen]="showDeleteModal"
-          [title]="'Eliminar Movimiento'"
-          [message]="'¿Está seguro de que desea eliminar el movimiento ' + (movementToDelete?.reference || '') + '?'"
-          [confirmText]="'Eliminar'"
+          [config]="{
+            title: 'Eliminar Movimiento',
+            message: '¿Está seguro de que desea eliminar el movimiento ' + (movementToDelete?.reference || '') + '?',
+            type: 'danger',
+            confirmText: 'Eliminar',
+            cancelText: 'Cancelar'
+          }"
           [loading]="loading"
-          (confirm)="confirmDelete()"
-          (cancel)="closeDeleteModal()">
+          (onConfirm)="confirmDelete()"
+          (onCancel)="closeDeleteModal()">
         </app-confirm-dialog>
       </ng-container>
     </div>

@@ -14,7 +14,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { RoleService, Role } from '../../../users/services/role.service';
 import { PermissionService } from '../../../users/services/permission.service';
 import { Permission } from '../../../users/models/permission.model';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogConfig } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { finalize } from 'rxjs/operators';
 
 @Component({
@@ -111,7 +111,7 @@ export class RoleFormComponent implements OnInit {
         cancelText: 'Cancelar',
         icon: 'save',
         iconColor: 'text-blue-500'
-      } as ConfirmDialogData
+      } as ConfirmDialogConfig
     });
 
     dialogRef.afterClosed().subscribe((confirmed: boolean) => {

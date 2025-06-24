@@ -19,20 +19,25 @@ import { ChangePasswordDialogComponent } from './change-password-dialog.componen
 import { AuthService } from '../../services/auth.service';
 import { DashboardService } from './services/dashboard.service';
 import { KpiWidgetComponent } from './components/kpi-widget.component';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatBadgeModule } from '@angular/material/badge';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule, 
-    MatIconModule, 
+    MatToolbarModule, 
     MatButtonModule, 
+    MatIconModule, 
+    MatMenuModule, 
+    MatBadgeModule, 
     MatDialogModule, 
     HttpClientModule, 
     MatProgressSpinnerModule, 
     NgChartsModule,
-    RouterModule,
-    KpiWidgetComponent
+    RouterModule
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss']

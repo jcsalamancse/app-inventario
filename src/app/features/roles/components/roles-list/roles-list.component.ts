@@ -18,7 +18,7 @@ import { RoleService, Role } from '../../../users/services/role.service';
 import { RoleFormComponent } from '../role-form/role-form.component';
 import { RolePermissionsDialogComponent } from '../role-permissions-dialog/role-permissions-dialog.component';
 import { map } from 'rxjs/operators';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogConfig } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-roles-list',
@@ -113,7 +113,7 @@ export class RolesListComponent implements OnInit {
         cancelText: 'Cancelar',
         icon: 'delete',
         iconColor: 'text-red-500'
-      } as ConfirmDialogData
+      } as ConfirmDialogConfig
     });
     dialogRef.afterClosed().subscribe(confirmed => {
       if (confirmed) {
@@ -143,7 +143,7 @@ export class RolesListComponent implements OnInit {
         cancelText: 'Cancelar',
         icon: role.isActive ? 'block' : 'check_circle',
         iconColor: role.isActive ? 'bg-yellow-100 text-yellow-500' : 'bg-green-100 text-green-500'
-      } as ConfirmDialogData
+      } as ConfirmDialogConfig
     });
     dialogRef.afterClosed().subscribe((confirmed: boolean) => {
       if (!confirmed) return;

@@ -138,12 +138,16 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
       <app-confirm-dialog
         *ngIf="showDeleteModal"
         [isOpen]="showDeleteModal"
-        [title]="'Eliminar Categoría'"
-        [message]="'¿Está seguro de que desea eliminar la categoría ' + (categoryToDelete?.name || '') + '?'"
-        [confirmText]="'Eliminar'"
+        [config]="{
+          title: 'Eliminar Categoría',
+          message: '¿Está seguro de que desea eliminar la categoría ' + (categoryToDelete?.name || '') + '?',
+          type: 'danger',
+          confirmText: 'Eliminar',
+          cancelText: 'Cancelar'
+        }"
         [loading]="loading"
-        (confirm)="confirmDelete()"
-        (cancel)="closeDeleteModal()">
+        (onConfirm)="confirmDelete()"
+        (onCancel)="closeDeleteModal()">
       </app-confirm-dialog>
     </div>
   `

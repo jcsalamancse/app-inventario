@@ -31,7 +31,8 @@ export class AuthInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
+        if (error.status === 401 && error.error?.message?.includes('token')) {
+          console.log('Token expirado o inválido, redirigiendo al login');
           this.authService.logout();
           this.router.navigate(['/auth/login']);
         }

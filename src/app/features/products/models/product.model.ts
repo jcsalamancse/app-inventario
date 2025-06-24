@@ -27,6 +27,8 @@ export interface Product {
 export interface ProductDto {
   id: number;
   name: string;
+  code?: string;
+  sku?: string;
   description?: string;
   price: number;
   currentStock: number;
@@ -40,6 +42,9 @@ export interface ProductDto {
   isActive: boolean;
   createdAt: Date;
   updatedAt?: Date;
+  supplierId: number;
+  warehouseId: number;
+  locationId: number;
 }
 
 export interface ProductPaginationResult {
@@ -98,4 +103,6 @@ export interface Unit {
   id: number;
   name: string;
   symbol: string;
+  categoryId?: number;
+  type?: string;
 } 

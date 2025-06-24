@@ -11,7 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { PermissionService } from '../../../permissions/services/permission.service';
 import { RoleService } from '../../../users/services/role.service';
 import { Permission } from '../../../permissions/models/permission.model';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogConfig } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-role-permissions-dialog',
@@ -205,7 +205,7 @@ export class RolePermissionsDialogComponent implements OnInit {
         cancelText: 'Cancelar',
         icon: 'save',
         iconColor: 'text-blue-500'
-      } as ConfirmDialogData
+      } as ConfirmDialogConfig
     });
     dialogRef.afterClosed().subscribe((confirmed: boolean) => {
       if (confirmed) {
@@ -240,7 +240,7 @@ export class RolePermissionsDialogComponent implements OnInit {
           cancelText: 'Cancelar',
           icon: 'warning',
           iconColor: 'text-yellow-500'
-        } as ConfirmDialogData
+        } as ConfirmDialogConfig
       });
       dialogRef.afterClosed().subscribe((confirmed: boolean) => {
         if (confirmed) {

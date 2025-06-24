@@ -1,7 +1,16 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ModalComponent } from '../modal/modal.component';
 
+export interface ConfirmDialogConfig {
+  title: string;
+  message: string;
+  type?: 'info' | 'warning' | 'danger' | 'success';
+  confirmText?: string;
+  cancelText?: string;
+  showIcon?: boolean;
+}
+
+// Mantener compatibilidad con el código existente
 export interface ConfirmDialogData {
   title?: string;
   message: string;
@@ -14,66 +23,120 @@ export interface ConfirmDialogData {
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [CommonModule, ModalComponent],
+  imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <app-modal 
-      [isOpen]="isOpen" 
-      [title]="title"
-      (close)="onCancel()">
-      
-      <div class="text-center">
-        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-          <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-          </svg>
-        </div>
-        <div class="mt-3 text-center sm:mt-5">
-          <h3 class="text-base font-semibold leading-6 text-gray-900">{{ title }}</h3>
-          <div class="mt-2">
-            <p class="text-sm text-gray-500">{{ message }}</p>
-          </div>
-        </div>
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <!-- Backdrop -->
+      <div 
+        class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity duration-300"
+        (click)="onCancel.emit()">
       </div>
 
-      <div modalFooter class="flex justify-end gap-3">
-        <button 
-          type="button"
-          (click)="onCancel()"
-          class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-          {{ cancelText }}
-        </button>
-        <button 
-          type="button"
-          (click)="onConfirm()"
-          [disabled]="loading"
-          class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
-          <span *ngIf="loading" class="mr-2">
-            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      <!-- Dialog -->
+      <div class="relative bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-md transform transition-all duration-300">
+        
+        <!-- Header -->
+        <div class="flex items-center p-6 border-b border-slate-200">
+          <div class="flex items-center space-x-4 flex-1">
+            <div 
+              class="p-3 rounded-lg"
+              [class]="getIconContainerClass()">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path *ngIf="config.type === 'danger'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                <path *ngIf="config.type === 'warning'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                <path *ngIf="config.type === 'success'" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <path *ngIf="config.type === 'info' || !config.type" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-slate-900">{{ config.title }}</h3>
+            </div>
+          </div>
+          
+          <button 
+            (click)="onCancel.emit()"
+            class="text-slate-400 hover:text-slate-600 transition-colors duration-200 p-1 rounded-lg hover:bg-slate-100"
+            type="button"
+            aria-label="Cerrar">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
-          </span>
-          {{ confirmText }}
-        </button>
+          </button>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6">
+          <p class="text-slate-700 leading-relaxed">{{ config.message }}</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-end space-x-3 p-6 border-t border-slate-200 bg-slate-50">
+          <button 
+            (click)="onCancel.emit()"
+            class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-500 transition-colors duration-200"
+            type="button">
+            {{ config.cancelText || 'Cancelar' }}
+          </button>
+          
+          <button 
+            (click)="onConfirm.emit()"
+            [disabled]="loading"
+            class="px-4 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            [class]="getConfirmButtonClass()"
+            type="button">
+            <div *ngIf="loading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+            {{ config.confirmText || 'Confirmar' }}
+          </button>
+        </div>
       </div>
-    </app-modal>
-  `
+    </div>
+  `,
+  styles: [`
+    :host {
+      display: block;
+    }
+  `]
 })
 export class ConfirmDialogComponent {
   @Input() isOpen = false;
+  @Input() config: ConfirmDialogConfig = { title: '', message: '' };
   @Input() title = 'Confirmar acción';
   @Input() message = '¿Está seguro de que desea realizar esta acción?';
   @Input() confirmText = 'Confirmar';
   @Input() cancelText = 'Cancelar';
   @Input() loading = false;
+  
+  @Output() onConfirm = new EventEmitter<void>();
+  @Output() onCancel = new EventEmitter<void>();
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
 
-  onConfirm() {
-    this.confirm.emit();
+  getIconContainerClass(): string {
+    switch (this.config.type) {
+      case 'danger':
+        return 'bg-red-100 text-red-600';
+      case 'warning':
+        return 'bg-yellow-100 text-yellow-600';
+      case 'success':
+        return 'bg-green-100 text-green-600';
+      case 'info':
+      default:
+        return 'bg-blue-100 text-blue-600';
+    }
   }
 
-  onCancel() {
-    this.cancel.emit();
+  getConfirmButtonClass(): string {
+    switch (this.config.type) {
+      case 'danger':
+        return 'bg-red-600 hover:bg-red-700 focus:ring-red-500';
+      case 'warning':
+        return 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500';
+      case 'success':
+        return 'bg-green-600 hover:bg-green-700 focus:ring-green-500';
+      case 'info':
+      default:
+        return 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500';
+    }
   }
 } 
