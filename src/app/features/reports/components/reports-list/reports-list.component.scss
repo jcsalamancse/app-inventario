@@ -1,0 +1,14 @@
+.mat-table {
+  background: transparent;
+}
+th.mat-header-cell, td.mat-cell {
+  color: #fff;
+  font-size: 1rem;
+}
+th.mat-header-cell {
+  font-weight: 600;
+  background: rgba(30, 41, 59, 0.7);
+}
+td.mat-cell {
+  background: rgba(30, 41, 59, 0.4);
+} 

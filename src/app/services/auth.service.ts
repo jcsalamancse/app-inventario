@@ -215,4 +215,40 @@ export class AuthService {
         })
       );
   }
+
+  /**
+   * Solicita el envío de un correo de recuperación de contraseña
+   * @param email Correo electrónico del usuario
+   */
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/auth/forgot-password`, { email }).pipe(
+      map(response => response),
+      catchError((error: HttpErrorResponse) => {
+        // Mensaje genérico por seguridad
+        let errorMessage = 'No se pudo procesar la solicitud. Intenta nuevamente más tarde.';
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        }
+        return throwError(() => ({ message: errorMessage }));
+      })
+    );
+  }
+
+  /**
+   * Restablece la contraseña usando el token recibido por email
+   * @param token Token de restablecimiento
+   * @param newPassword Nueva contraseña
+   */
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/user/reset-password`, { token, newPassword }).pipe(
+      map(response => response),
+      catchError((error: HttpErrorResponse) => {
+        let errorMessage = 'No se pudo restablecer la contraseña.';
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        }
+        return throwError(() => ({ message: errorMessage }));
+      })
+    );
+  }
 } 

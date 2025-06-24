@@ -58,11 +58,16 @@ export const routes: Routes = [
           })
       },
       {
+        path: 'reportes',
+        loadChildren: () => import('./features/reports/reports.module').then(m => m.ReportsModule)
+      },
+      {
         path: '',
         loadComponent: () => import('./features/dashboard/components/dashboard-home.component').then(m => m.DashboardHomeComponent)
       }
     ]
   },
+  { path: 'reset-password', loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent) },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', component: NotFoundComponent }
 ];

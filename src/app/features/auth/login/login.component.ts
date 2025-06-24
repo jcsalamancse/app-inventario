@@ -14,6 +14,7 @@ import { Observable } from 'rxjs';
 import { login } from '../../../store/actions/auth.actions';
 import { selectAuthLoading, selectAuthError } from '../../../store/selectors/auth.selectors';
 import { isPlatformBrowser } from '@angular/common';
+import { ForgotPasswordComponent } from '../forgot-password/forgot-password.component';
 
 @Component({
   selector: 'app-login',
@@ -28,7 +29,8 @@ import { isPlatformBrowser } from '@angular/common';
     MatIconModule,
     MatProgressSpinnerModule,
     MatCheckboxModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    ForgotPasswordComponent
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
@@ -38,6 +40,7 @@ export class LoginComponent {
   loading$: Observable<boolean>;
   error$: Observable<string | null>;
   hidePassword = true;
+  showForgotPasswordModal = false;
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
@@ -104,5 +107,13 @@ export class LoginComponent {
       return 'La contraseña debe tener al menos 6 caracteres';
     }
     return '';
+  }
+
+  openForgotPasswordModal() {
+    this.showForgotPasswordModal = true;
+  }
+
+  onForgotPasswordClosed() {
+    this.showForgotPasswordModal = false;
   }
 }

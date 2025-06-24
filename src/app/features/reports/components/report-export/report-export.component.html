@@ -1,0 +1,11 @@
+<div class="bg-white/10 backdrop-blur-sm rounded-2xl shadow-xl p-6 mb-8">
+  <h2 class="text-xl font-semibold text-white mb-4">Exportar Reporte</h2>
+  <form (ngSubmit)="export()" class="space-y-4">
+    <!-- Aquí puedes agregar campos de filtro para la exportación -->
+    <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+      <mat-icon>download</mat-icon>
+      <span>Exportar</span>
+      <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+    </button>
+  </form>
+</div> 
