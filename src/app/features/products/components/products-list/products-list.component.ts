@@ -21,7 +21,7 @@ export interface ProductStats {
 
 export interface ProductFilters {
   searchTerm?: string;
-  categoryId?: number[];
+  categoryId?: string;
   priceRange?: string;
   status?: string;
 }
@@ -479,6 +479,7 @@ export class ProductsListComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    console.log('Inicializando componente de productos...');
     this.loadCategories();
     this.loadProducts();
     this.loadStatistics();
@@ -499,19 +500,61 @@ export class ProductsListComponent implements OnInit {
   loadProducts() {
     console.log('Iniciando carga de productos...');
     this.loading = true;
+    
+    // Crear filtro básico
     const filter: ProductFilter = {
-      ...this.filters,
       page: this.currentPage,
       pageSize: this.pageSize
     };
 
-    console.log('Filtros aplicados:', filter);
+    // Aplicar filtros solo si tienen valor
+    if (this.filters.searchTerm && this.filters.searchTerm.trim() !== '') {
+      filter.searchTerm = this.filters.searchTerm.trim();
+      console.log('Filtro de búsqueda aplicado:', filter.searchTerm);
+    }
+
+    if (this.filters.categoryId && this.filters.categoryId !== '') {
+      const categoryId = Number(this.filters.categoryId);
+      if (!isNaN(categoryId)) {
+        filter.categoryId = [categoryId];
+        console.log('Filtro de categoría aplicado:', filter.categoryId);
+      }
+    }
+
+    if (this.filters.priceRange && this.filters.priceRange !== '') {
+      switch (this.filters.priceRange) {
+        case '0-100':
+          filter.minPrice = 0;
+          filter.maxPrice = 100;
+          break;
+        case '100-500':
+          filter.minPrice = 100;
+          filter.maxPrice = 500;
+          break;
+        case '500-1000':
+          filter.minPrice = 500;
+          filter.maxPrice = 1000;
+          break;
+        case '1000+':
+          filter.minPrice = 1000;
+          break;
+      }
+      console.log('Filtro de precio aplicado:', { minPrice: filter.minPrice, maxPrice: filter.maxPrice });
+    }
+
+    if (this.filters.status && this.filters.status !== '') {
+      filter.isActive = this.filters.status === 'active';
+      console.log('Filtro de estado aplicado:', filter.isActive);
+    }
+
+    console.log('Filtros finales aplicados:', filter);
 
     this.productService.getProducts(filter).subscribe({
       next: (response: ProductPaginationResult) => {
         console.log('Respuesta del backend:', response);
         let items = response.Items;
         let mappedProducts: any[] = [];
+        
         if (items && Array.isArray(items.$values)) {
           mappedProducts = items.$values.map((p: any) => ({
             id: p.Id,
@@ -538,8 +581,9 @@ export class ProductsListComponent implements OnInit {
         } else if (Array.isArray(items)) {
           mappedProducts = items;
         }
+        
         this.products = mappedProducts;
-        console.log('Productos mapeados:', this.products);
+        console.log('Productos mapeados:', this.products.length, 'productos');
         this.totalItems = response.TotalCount;
         this.totalPages = response.TotalPages;
         this.loading = false;
@@ -566,12 +610,20 @@ export class ProductsListComponent implements OnInit {
 
   // Eventos de filtros
   onFiltersChange() {
+    console.log('Filtros cambiados:', this.filters);
+    // Resetear a la primera página cuando cambian los filtros
     this.currentPage = 1;
+    // Cargar productos inmediatamente
     this.loadProducts();
   }
 
   clearFilters() {
-    this.filters = {};
+    this.filters = {
+      searchTerm: '',
+      categoryId: '',
+      priceRange: '',
+      status: ''
+    };
     this.onFiltersChange();
   }
 

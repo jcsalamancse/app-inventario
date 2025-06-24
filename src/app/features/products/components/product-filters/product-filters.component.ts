@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 export interface ProductFilters {
   searchTerm?: string;
-  categoryId?: number[];
+  categoryId?: string;
   priceRange?: string;
   status?: string;
 }
@@ -123,7 +123,12 @@ export class ProductFiltersComponent {
   }
 
   clearFilters() {
-    this.filters = {};
+    this.filters = {
+      searchTerm: '',
+      categoryId: '',
+      priceRange: '',
+      status: ''
+    };
     this.filtersChange.emit(this.filters);
   }
 } 

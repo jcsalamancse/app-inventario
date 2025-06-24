@@ -591,7 +591,7 @@ export class ProductFormComponent implements OnInit, OnChanges {
 
   loadSuppliers() {
     this.supplierService.getSuppliers().subscribe({
-      next: (suppliers) => this.suppliers = suppliers,
+      next: (suppliers: any[]) => this.suppliers = suppliers,
       error: () => this.suppliers = []
     });
   }
