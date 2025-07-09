@@ -1,4 +1,4 @@
-package com.dataifx.inventario;
+package com.inventario.app;
 
 import com.getcapacitor.BridgeActivity;
 

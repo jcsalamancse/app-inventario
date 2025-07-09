@@ -34,15 +34,14 @@
           {{ getErrorMessage('password') }}
         </mat-error>
       </mat-form-field>
-      <button mat-raised-button color="primary" class="w-full py-2 mt-2 font-semibold text-lg shadow-lg transition" [disabled]="loginForm.invalid || loading">
-        <span *ngIf="!loading">Iniciar sesión</span>
-        <mat-progress-spinner *ngIf="loading" diameter="24" mode="indeterminate" color="accent"></mat-progress-spinner>
+      <button mat-raised-button color="primary" class="w-full py-2 mt-2 font-semibold text-lg shadow-lg transition" [disabled]="loginForm.invalid || (loading$ | async)">
+        <span *ngIf="!(loading$ | async)">Iniciar sesión</span>
+        <mat-progress-spinner *ngIf="loading$ | async" diameter="24" mode="indeterminate" color="accent"></mat-progress-spinner>
       </button>
-      
       <div class="flex justify-end mt-3">
         <button type="button" (click)="openForgotPasswordModal()" class="text-sm text-blue-300 hover:underline bg-transparent border-0 p-0 m-0 cursor-pointer focus:outline-none">¿Olvidaste tu contraseña?</button>
       </div>
-      <div *ngIf="error" class="mt-4 text-red-400 text-center">
+      <div *ngIf="error$ | async as error" class="mt-4 text-red-400 text-center">
         {{ error }}
       </div>
     </form>

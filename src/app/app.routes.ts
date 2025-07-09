@@ -25,21 +25,37 @@ export const routes: Routes = [
         path: 'products',
         loadComponent: () => import('./features/products/components/products-list/products-list.component')
           .then(m => m.ProductsListComponent)
+          .catch(() => {
+            console.error('Error al cargar el componente de productos');
+            return NotFoundComponent;
+          })
       },
       {
         path: 'roles',
         loadComponent: () => import('./features/roles/components/roles-list/roles-list.component')
           .then(m => m.RolesListComponent)
+          .catch(() => {
+            console.error('Error al cargar el componente de roles');
+            return NotFoundComponent;
+          })
       },
       {
         path: 'permissions',
         loadChildren: () => import('./features/permissions/permissions.module')
           .then(m => m.PermissionsModule)
+          .catch(() => {
+            console.error('Error al cargar el módulo de permisos');
+            return NotFoundComponent;
+          })
       },
       {
         path: 'movimientos',
         loadComponent: () => import('./features/movements/components/movement-list.component')
           .then(m => m.MovementListComponent)
+          .catch(() => {
+            console.error('Error al cargar el componente de movimientos');
+            return NotFoundComponent;
+          })
       },
       {
         path: 'reportes',
@@ -47,9 +63,7 @@ export const routes: Routes = [
       },
       {
         path: '',
-        pathMatch: 'full',
-        loadComponent: () => import('./features/dashboard/components/dashboard-home.component')
-          .then(m => m.DashboardHomeComponent)
+        loadComponent: () => import('./features/dashboard/components/dashboard-home.component').then(m => m.DashboardHomeComponent)
       }
     ]
   },

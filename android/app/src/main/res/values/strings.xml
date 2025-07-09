@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">App Inventario</string>
-    <string name="title_activity_main">App Inventario</string>
-    <string name="package_name">com.dataifx.inventario</string>
-    <string name="custom_url_scheme">com.dataifx.inventario</string>
+    <string name="app_name">app-inventario</string>
+    <string name="title_activity_main">app-inventario</string>
+    <string name="package_name">com.inventario.app</string>
+    <string name="custom_url_scheme">com.inventario.app</string>
 </resources>

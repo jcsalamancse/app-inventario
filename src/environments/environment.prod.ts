@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://adsoinventarios.dataifx.co:3434/Api/api'
+  apiUrl: 'https://localhost:7044/api' // Cambia esto por la URL real en producción
 }; 

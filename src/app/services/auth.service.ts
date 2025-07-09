@@ -46,12 +46,12 @@ export class AuthService {
   private readonly USER_KEY = 'user_data';
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   private baseUrl = environment.apiUrl;
-  private readonly loginEndpoint = '/Auth/login';
-  private readonly changePasswordEndpoint = '/User/me/password';
+  private readonly loginEndpoint = '/Auth/Login';
+  private readonly changePasswordEndpoint = 'User/me/password';
   private readonly usersEndpoint = '/User';
   private readonly rolesEndpoint = '/roles';
-  private readonly refreshTokenEndpoint = '/auth/refresh-token';
-  private readonly logoutEndpoint = '/auth/logout';
+  private readonly refreshTokenEndpoint = '/api/auth/refresh-token';
+  private readonly logoutEndpoint = '/api/auth/logout';
 
   constructor(
     private http: HttpClient,
