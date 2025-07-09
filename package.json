@@ -1,13 +1,21 @@
 {
-  "name": "app-inventario",
-  "version": "0.0.0",
+  "name": "app-inventario-mobile",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "set NODE_TLS_REJECT_UNAUTHORIZED=0 && ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
+    "build:mobile": "ng build --configuration mobile",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:app-inventario": "set NODE_TLS_REJECT_UNAUTHORIZED=0 && node dist/app-inventario/server/server.mjs"
+    "serve:ssr:app-inventario": "set NODE_TLS_REJECT_UNAUTHORIZED=0 && node dist/app-inventario/server/server.mjs",
+    "cap:add": "npx cap add android",
+    "cap:copy": "npx cap copy android",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
+    "cap:run": "npx cap run android",
+    "cap:build": "npm run build:mobile && npx cap sync android",
+    "mobile:dev": "npm run build:mobile && npx cap sync android && npx cap open android"
   },
   "private": true,
   "dependencies": {
@@ -23,6 +31,14 @@
     "@angular/platform-server": "^19.2.0",
     "@angular/router": "^19.2.0",
     "@angular/ssr": "^19.2.14",
+    "@capacitor/android": "^7.4.1",
+    "@capacitor/app": "^7.0.1",
+    "@capacitor/cli": "^7.4.1",
+    "@capacitor/core": "^7.4.1",
+    "@capacitor/network": "^7.0.1",
+    "@capacitor/preferences": "^7.0.1",
+    "@capacitor/splash-screen": "^7.0.1",
+    "@capacitor/status-bar": "^7.0.1",
     "@ngrx/effects": "^19.0.0",
     "@ngrx/entity": "^19.0.0",
     "@ngrx/store": "^19.0.0",
@@ -53,5 +69,19 @@
     "sass": "^1.89.2",
     "tailwindcss": "^3.4.1",
     "typescript": "~5.7.2"
-  }
+  },
+  "description": "",
+  "main": "generate-icons.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jcsalamancse/app-inventario.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jcsalamancse/app-inventario/issues"
+  },
+  "homepage": "https://github.com/jcsalamancse/app-inventario#readme"
 }
